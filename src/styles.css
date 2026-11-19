@@ -1,0 +1,1008 @@
+/*
+ * Stili dell'app. Un solo foglio di stile, organizzato per sezioni:
+ * variabili → base → elementi comuni → studenti → docente → ripasso → stampa.
+ * Approccio "mobile first": le regole di base valgono per il telefono,
+ * le media query aggiungono il layout per schermi grandi (proiettore).
+ */
+
+/* ---------------------------------------------------------------- variabili */
+
+:root {
+  --color-bg: #f4f5fb;
+  --color-surface: #ffffff;
+  --color-text: #1c1d2b;
+  --color-muted: #5e6178;
+  --color-border: #dcdfeb;
+  --color-primary: #4338ca;
+  --color-primary-dark: #3730a3;
+  --color-danger: #b91c1c;
+  --color-success: #15803d;
+  --color-success-bg: #dcfce7;
+  --color-error-bg: #fee2e2;
+  --color-warning-bg: #fef3c7;
+
+  /* Colori delle quattro opzioni (A, B, C, D), con contrasto sufficiente per testo bianco. */
+  --option-a: #c0262d;
+  --option-b: #1d5fc9;
+  --option-c: #a35c00;
+  --option-d: #1f7a3a;
+
+  --radius: 12px;
+  --shadow: 0 1px 3px rgb(0 0 0 / 8%), 0 4px 16px rgb(0 0 0 / 6%);
+  --font: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+
+  color-scheme: light;
+}
+
+/* ---------------------------------------------------------------- base */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font);
+  font-size: 17px;
+  line-height: 1.5;
+  color: var(--color-text);
+  background: var(--color-bg);
+}
+
+h1,
+h2,
+h3 {
+  line-height: 1.2;
+  margin: 0 0 0.5em;
+}
+
+code {
+  font-size: 0.9em;
+  background: #eceef6;
+  padding: 0.1em 0.3em;
+  border-radius: 4px;
+}
+
+a {
+  color: var(--color-primary);
+}
+
+.muted {
+  color: var(--color-muted);
+}
+
+.small {
+  font-size: 0.875rem;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* ---------------------------------------------------------------- elementi comuni */
+
+.card {
+  background: var(--color-surface);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 1.25rem;
+}
+
+details.card > summary {
+  cursor: pointer;
+  font-weight: 600;
+}
+
+details.card[open] > summary {
+  margin-bottom: 0.75rem;
+}
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4em;
+  min-height: 44px; /* area di tocco comoda sul telefono */
+  padding: 0.5em 1.1em;
+  border: 2px solid transparent;
+  border-radius: 10px;
+  font: inherit;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background-color 0.15s, transform 0.05s;
+}
+
+.button:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+.button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.button.primary {
+  background: var(--color-primary);
+  color: #fff;
+}
+
+.button.primary:hover:not(:disabled) {
+  background: var(--color-primary-dark);
+}
+
+.button.secondary {
+  background: var(--color-surface);
+  border-color: var(--color-border);
+  color: var(--color-text);
+}
+
+.button.secondary:hover:not(:disabled) {
+  border-color: var(--color-primary);
+}
+
+.button.danger {
+  background: var(--color-danger);
+  color: #fff;
+}
+
+.button.danger-text {
+  background: none;
+  color: var(--color-danger);
+}
+
+.button.small {
+  min-height: 34px;
+  padding: 0.2em 0.8em;
+  font-size: 0.875rem;
+}
+
+.button.large {
+  min-height: 56px;
+  font-size: 1.2rem;
+  padding: 0.5em 1.6em;
+}
+
+.button-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.badge {
+  display: inline-block;
+  padding: 0.15em 0.6em;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  background: #eceef6;
+  color: var(--color-muted);
+  vertical-align: middle;
+}
+
+.badge-published {
+  background: var(--color-success-bg);
+  color: var(--color-success);
+}
+
+.badge-live {
+  background: var(--color-danger);
+  color: #fff;
+}
+
+.error-box,
+.success-box,
+.warning-box {
+  padding: 0.75rem 1rem;
+  border-radius: 10px;
+  margin: 0.75rem 0;
+}
+
+.error-box {
+  background: var(--color-error-bg);
+  color: #7f1d1d;
+}
+
+.error-box ul {
+  margin: 0.5rem 0 0;
+  padding-left: 1.25rem;
+}
+
+.success-box {
+  background: var(--color-success-bg);
+  color: #14532d;
+}
+
+.warning-box {
+  background: var(--color-warning-bg);
+  color: #78350f;
+}
+
+.form-error {
+  color: var(--color-danger);
+  min-height: 1.5em;
+  margin: 0.25rem 0;
+}
+
+label {
+  display: block;
+  font-weight: 600;
+  margin-top: 0.75rem;
+}
+
+input:not([type='checkbox']):not([type='file']),
+textarea {
+  width: 100%;
+  margin-top: 0.3rem;
+  padding: 0.7em 0.8em;
+  font: inherit;
+  border: 2px solid var(--color-border);
+  border-radius: 10px;
+  background: #fff;
+}
+
+input:focus,
+textarea:focus {
+  outline: none;
+  border-color: var(--color-primary);
+}
+
+label.checkbox {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 400;
+  margin: 0;
+}
+
+/* Messaggi di stato ("Attendi...", "Nessun quiz in onda") */
+.status-message {
+  max-width: 32rem;
+  margin: 3rem auto;
+  padding: 2rem 1.5rem;
+  text-align: center;
+  background: var(--color-surface);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+
+.status-error h2 {
+  color: var(--color-danger);
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  margin: 0 auto 1rem;
+  border: 4px solid var(--color-border);
+  border-top-color: var(--color-primary);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Finestra di dialogo */
+.dialog {
+  max-width: min(32rem, calc(100vw - 2rem));
+  border: none;
+  border-radius: var(--radius);
+  padding: 1.5rem;
+  box-shadow: 0 20px 60px rgb(0 0 0 / 30%);
+}
+
+.dialog::backdrop {
+  background: rgb(15 17 40 / 55%);
+}
+
+.dialog-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  margin-top: 1.25rem;
+}
+
+/* ---------------------------------------------------------------- domanda e opzioni */
+
+.question-card {
+  margin-bottom: 1rem;
+}
+
+.question-counter {
+  margin: 0 0 0.25rem;
+  color: var(--color-muted);
+  font-weight: 600;
+}
+
+.question-text {
+  font-size: 1.35rem;
+}
+
+.option-grid {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.75rem;
+}
+
+.option {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  min-height: 64px;
+  padding: 0.75rem 1rem;
+  border: 3px solid transparent;
+  border-radius: var(--radius);
+  font: inherit;
+  font-size: 1.1rem;
+  font-weight: 600;
+  text-align: left;
+  color: #fff;
+}
+
+button.option {
+  cursor: pointer;
+}
+
+button.option:disabled {
+  cursor: default;
+}
+
+.option-a { background: var(--option-a); }
+.option-b { background: var(--option-b); }
+.option-c { background: var(--option-c); }
+.option-d { background: var(--option-d); }
+
+.option-letter {
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 8px;
+  background: rgb(255 255 255 / 25%);
+}
+
+.option-text {
+  flex: 1;
+}
+
+.option-badge {
+  font-size: 1.4rem;
+}
+
+/* Dopo che lo studente ha scelto, le altre opzioni si attenuano */
+button.option:disabled:not(.option-selected) {
+  opacity: 0.45;
+}
+
+.option-selected {
+  border-color: var(--color-text);
+  box-shadow: 0 0 0 3px #fff inset;
+}
+
+/* Dopo la rivelazione: corrette piene, sbagliate attenuate */
+.option.option-correct {
+  opacity: 1;
+}
+
+.option.option-wrong {
+  opacity: 0.35;
+}
+
+.option.option-wrong.option-selected {
+  opacity: 0.7;
+}
+
+/* Timer circolare: il bordo colorato si accorcia con il tempo (variabile --progress tra 0 e 1) */
+.timer {
+  --size: 64px;
+  display: grid;
+  place-items: center;
+  width: var(--size);
+  height: var(--size);
+  margin: 0 auto 0.75rem;
+  border-radius: 50%;
+  background: conic-gradient(var(--color-primary) calc(var(--progress) * 360deg), var(--color-border) 0);
+  font-weight: 700;
+  font-size: 1.4rem;
+}
+
+.timer span {
+  display: grid;
+  place-items: center;
+  width: calc(var(--size) - 12px);
+  height: calc(var(--size) - 12px);
+  border-radius: 50%;
+  background: var(--color-surface);
+}
+
+.timer-urgent {
+  background: conic-gradient(var(--color-danger) calc(var(--progress) * 360deg), var(--color-border) 0);
+  color: var(--color-danger);
+}
+
+/* Grafico delle risposte */
+.answer-chart {
+  list-style: none;
+  padding: 0;
+  margin: 1rem 0;
+  display: grid;
+  gap: 0.6rem;
+}
+
+.chart-row {
+  display: grid;
+  grid-template-columns: 2.5rem 1fr 3.5rem;
+  align-items: center;
+  gap: 0.75rem;
+  transition: opacity 0.3s;
+}
+
+.chart-row.dimmed {
+  opacity: 0.35;
+}
+
+.chart-letter {
+  display: grid;
+  place-items: center;
+  height: 2.5rem;
+  border-radius: 8px;
+  color: #fff;
+  font-weight: 700;
+}
+
+.chart-track {
+  height: 2.5rem;
+  background: #e8eaf3;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.chart-bar {
+  height: 100%;
+  min-width: 4px;
+  transition: width 0.4s ease-out; /* le barre "crescono" a ogni nuova risposta */
+}
+
+.chart-count {
+  font-size: 1.3rem;
+  font-weight: 700;
+}
+
+/* Classifica */
+.leaderboard {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.leader-row {
+  display: grid;
+  grid-template-columns: 2.5rem 1fr auto;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.leader-row.me {
+  background: #e0e7ff;
+  border-radius: 8px;
+  font-weight: 700;
+}
+
+.leader-rank {
+  font-weight: 700;
+  color: var(--color-muted);
+}
+
+.leader-score {
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+}
+
+.leader-gap {
+  text-align: center;
+  color: var(--color-muted);
+}
+
+/* ---------------------------------------------------------------- studenti */
+
+.student-shell {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.student-header,
+.host-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.75rem 1rem;
+  background: var(--color-primary);
+  color: #fff;
+}
+
+.brand {
+  font-weight: 700;
+}
+
+.student-nickname {
+  padding: 0.2em 0.7em;
+  border-radius: 999px;
+  background: rgb(255 255 255 / 20%);
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.student-main {
+  flex: 1;
+  width: 100%;
+  max-width: 40rem;
+  margin: 0 auto;
+  padding: 1rem;
+}
+
+.nickname-form {
+  margin-top: 2rem;
+}
+
+.nickname-form .button {
+  width: 100%;
+}
+
+.feedback {
+  margin: 1rem 0;
+  padding: 1rem;
+  border-radius: var(--radius);
+  text-align: center;
+  font-weight: 600;
+}
+
+.feedback p {
+  margin: 0.25rem 0;
+}
+
+.feedback-title {
+  font-size: 1.4rem;
+}
+
+.feedback-sent {
+  background: #e0e7ff;
+  color: var(--color-primary-dark);
+}
+
+.feedback-neutral {
+  background: #eceef6;
+}
+
+.feedback-correct {
+  background: var(--color-success-bg);
+  color: #14532d;
+}
+
+.feedback-wrong {
+  background: var(--color-error-bg);
+  color: #7f1d1d;
+}
+
+.my-score {
+  font-weight: 700;
+  font-size: 1.1rem;
+}
+
+.final-results {
+  margin-top: 1rem;
+  text-align: center;
+}
+
+.final-results .leaderboard {
+  text-align: left;
+}
+
+/* ---------------------------------------------------------------- docente */
+
+.host-header nav {
+  display: flex;
+  gap: 0.25rem;
+  margin-right: auto;
+}
+
+.host-header nav a {
+  color: #fff;
+  text-decoration: none;
+  padding: 0.3em 0.8em;
+  border-radius: 8px;
+}
+
+.host-header nav a.active {
+  background: rgb(255 255 255 / 20%);
+}
+
+.host-main {
+  padding: 1rem;
+  max-width: 90rem;
+  margin: 0 auto;
+}
+
+.host-login {
+  max-width: 26rem;
+  margin: 3rem auto;
+  padding: 0 1rem;
+}
+
+.login-form .button {
+  width: 100%;
+}
+
+.page-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin: 1rem 0;
+}
+
+.on-air-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius);
+  background: #fff1f2;
+  border: 1px solid #fecdd3;
+}
+
+.uploader,
+.moderation-panel {
+  margin: 1rem 0;
+}
+
+.uploader input[type='file'] {
+  margin: 0.5rem 0;
+}
+
+.quiz-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 0.75rem;
+}
+
+.quiz-item {
+  background: var(--color-surface);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 1rem 1.25rem;
+  display: grid;
+  gap: 0.75rem;
+}
+
+.quiz-item.on-air {
+  outline: 2px solid var(--color-danger);
+}
+
+.quiz-info h3 {
+  margin-bottom: 0.25rem;
+}
+
+.quiz-info p {
+  margin: 0 0 0.4rem;
+}
+
+.quiz-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.moderation-editor textarea {
+  font-family: ui-monospace, monospace;
+}
+
+/* Partita in onda: caratteri grandi, leggibili dal fondo dell'aula */
+.game-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.game-header h1 {
+  margin: 0;
+}
+
+.game-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+  font-size: 1.2rem;
+}
+
+.game-layout {
+  display: grid;
+  gap: 1rem;
+}
+
+.game-stage {
+  background: var(--color-surface);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 1.5rem;
+}
+
+.game-stage .question-text {
+  font-size: clamp(1.5rem, 2.6vw, 2.6rem);
+}
+
+.game-stage .option {
+  font-size: clamp(1.1rem, 1.8vw, 1.7rem);
+  min-height: 80px;
+}
+
+.stage-top:empty {
+  display: none;
+}
+
+.game-stage .timer {
+  --size: 96px;
+  font-size: 2rem;
+}
+
+.game-controls {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+}
+
+.explanation {
+  padding: 1rem;
+  border-left: 4px solid var(--color-primary);
+  background: #eef0ff;
+  border-radius: 0 10px 10px 0;
+  font-size: 1.15rem;
+}
+
+.join-panel {
+  text-align: center;
+}
+
+.join-panel h2 {
+  font-size: 2rem;
+}
+
+.qr-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  margin: 0;
+}
+
+.qr-box svg {
+  max-width: 100%;
+  height: auto;
+}
+
+.qr-box figcaption {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.qr-url {
+  font-size: 1.1rem;
+  font-weight: 600;
+  word-break: break-all;
+}
+
+.join-panel .qr-url {
+  font-size: 1.5rem;
+}
+
+.nickname-cloud {
+  list-style: none;
+  padding: 0;
+  margin: 1.5rem 0 0;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.nickname-cloud li {
+  padding: 0.3em 0.9em;
+  border-radius: 999px;
+  background: #e0e7ff;
+  font-weight: 600;
+  font-size: 1.1rem;
+}
+
+.final-board {
+  max-width: 40rem;
+  margin: 0 auto;
+  font-size: 1.3rem;
+}
+
+.final-board h2 {
+  text-align: center;
+  font-size: 2.2rem;
+}
+
+.game-sidebar {
+  display: grid;
+  gap: 1rem;
+  align-content: start;
+}
+
+.sidebar-actions {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.player-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  max-height: 20rem;
+  overflow-y: auto;
+}
+
+.player-list li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--color-border);
+}
+
+/* Schermi larghi (PC collegato al proiettore): area principale + barra laterale */
+@media (min-width: 1000px) {
+  .game-layout {
+    grid-template-columns: 1fr 20rem;
+  }
+
+  .game-stage .option-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .quiz-item {
+    grid-template-columns: 1fr auto;
+    align-items: center;
+  }
+
+  .quiz-actions {
+    justify-content: flex-end;
+    max-width: 34rem;
+  }
+}
+
+/* ---------------------------------------------------------------- ripasso */
+
+.review-page {
+  max-width: 48rem;
+  margin: 0 auto;
+  padding: 1rem;
+}
+
+.review-header {
+  margin: 1rem 0 1.5rem;
+}
+
+.review-header p {
+  margin: 0;
+}
+
+.review-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 1rem;
+}
+
+.review-item {
+  background: var(--color-surface);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 1rem 1.25rem;
+  break-inside: avoid; /* in stampa una domanda non si spezza tra due pagine */
+}
+
+.review-item h3 {
+  font-size: 1.1rem;
+}
+
+.review-number {
+  color: var(--color-muted);
+}
+
+.review-options {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 0.75rem;
+  display: grid;
+  gap: 0.4rem;
+}
+
+.review-option {
+  display: flex;
+  gap: 0.6rem;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+}
+
+.review-option.correct {
+  border: 2px solid var(--color-success);
+  background: var(--color-success-bg);
+  font-weight: 600;
+}
+
+.review-letter {
+  font-weight: 700;
+  color: var(--color-muted);
+}
+
+.review-explanation {
+  margin: 0;
+  padding: 0.75rem;
+  background: #eef0ff;
+  border-radius: 8px;
+}
+
+/* ---------------------------------------------------------------- stampa */
+
+@media print {
+  body {
+    background: #fff;
+    font-size: 12pt;
+  }
+
+  .no-print,
+  .button {
+    display: none !important;
+  }
+
+  .review-item {
+    box-shadow: none;
+    border: 1px solid #999;
+  }
+
+  .review-option.correct {
+    background: none;
+  }
+}
+
+/* Suggerimento discreto sotto un modulo (es. modalità emulatore nel login). */
+.hint {
+  font-size: 0.9rem;
+  color: var(--color-muted);
+}

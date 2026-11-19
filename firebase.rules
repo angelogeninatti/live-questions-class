@@ -1,0 +1,175 @@
+rules_version = '2';
+
+// =============================================================================
+// Regole di sicurezza di Cloud Firestore per "Quiz in aula".
+//
+// Da incollare in: console Firebase → Firestore Database → Regole → Pubblica.
+//
+// PRIMA DI PUBBLICARLE sostituisci INSERISCI_QUI_UID_DOCENTE (una sola occorrenza,
+// nella funzione isHost) con l'UID dell'account del docente, che trovi in
+// Authentication → Users → colonna "User UID".
+//
+// Principio generale: tutto ciò che non è permesso esplicitamente è vietato.
+// La configurazione Firebase nel codice del sito è pubblica; è QUI che si decide
+// chi può leggere e scrivere cosa.
+// =============================================================================
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ---------------------------------------------------------------- funzioni
+
+    // Il docente è identificato dal suo UID (account email e password).
+    function isHost() {
+      return request.auth != null && request.auth.uid == '5o2T1fg9zuX8xqMJvnJfN8PYIFD2';
+    }
+
+    // Qualsiasi utente autenticato, compresi gli studenti con accesso anonimo.
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    // Id del quiz attualmente in onda.
+    function onAirQuizId() {
+      return get(/databases/$(database)/documents/config/activeGame).data.quizId;
+    }
+
+    function moderationPath() {
+      return /databases/$(database)/documents/config/moderation;
+    }
+
+    // Il nickname (già in minuscolo) non contiene parole vietate. Controllo parola
+    // per parola e sul nickname senza separatori; l'app fa in più un controllo
+    // tollerante (accenti, cifre al posto di lettere) prima di scrivere.
+    function nicknameAllowed(key) {
+      return !exists(moderationPath())
+        || noBannedWords(key, get(moderationPath()).data.bannedWords);
+    }
+
+    function noBannedWords(key, banned) {
+      return !key.split("[ ._'-]+").hasAny(banned)
+        && !(key.replace("[ ._'-]+", "") in banned);
+    }
+
+    // ------------------------------------------------------------------- quiz
+
+    match /quizzes/{quizId} {
+      // Parte pubblica (testi e opzioni, senza soluzioni). La legge:
+      //  - il docente;
+      //  - chiunque, se il docente ha pubblicato il ripasso;
+      //  - gli studenti, solo per il quiz attualmente in onda.
+      // Un quiz inesistente o non accessibile dà lo stesso errore "permesso negato":
+      // dall'esterno non si capisce se l'id esiste.
+      allow get: if isHost()
+        || resource.data.reviewPublished == true
+        || (signedIn() && onAirQuizId() == quizId);
+      // Solo il docente può elencare tutta la libreria.
+      allow list: if isHost();
+      allow write: if isHost();
+
+      // Soluzioni: leggibili dal docente, oppure da tutti SOLO se reviewPublished è true.
+      // Pubblicare il ripasso non copia nulla: è un interruttore sul documento del quiz.
+      match /private/solutions {
+        allow get: if isHost()
+          || get(/databases/$(database)/documents/quizzes/$(quizId)).data.reviewPublished == true;
+        allow write: if isHost();
+      }
+    }
+
+    // ------------------------------------------------------- configurazione
+
+    // Quale partita è in onda: tutti la leggono, solo il docente la cambia.
+    match /config/activeGame {
+      allow get: if signedIn();
+      allow write: if isHost();
+    }
+
+    // Parole vietate nei nickname: le legge l'app dello studente per il controllo
+    // preventivo, le scrive solo il docente. Non stanno nel repository pubblico.
+    match /config/moderation {
+      allow get: if signedIn();
+      allow write: if isHost();
+    }
+
+    // ---------------------------------------------------------------- partite
+
+    match /games/{gameId} {
+      // Stato della partita: lo leggono tutti in tempo reale, lo scrive solo il docente.
+      // Contiene le soluzioni SOLO delle domande già rivelate (mappa `revealed`).
+      allow get: if signedIn();
+      allow list, write: if isHost();
+
+      function game() {
+        return get(/databases/$(database)/documents/games/$(gameId)).data;
+      }
+
+      // ---- giocatori: games/{gameId}/players/{uid}
+      match /players/{uid} {
+        // Ognuno legge solo il proprio profilo (serve per rientrare dopo un ricaricamento).
+        allow get: if isHost() || (signedIn() && request.auth.uid == uid);
+        allow list, delete: if isHost();
+
+        // Lo studente crea SOLO il proprio profilo, con un nickname valido, non vietato,
+        // "prenotato" a suo nome nella stessa scrittura, se non è stato espulso.
+        // Nessun update: il nickname non si cambia.
+        allow create: if signedIn()
+          && request.auth.uid == uid
+          && request.resource.data.keys().hasOnly(['nickname', 'nicknameKey', 'joinedAt'])
+          && request.resource.data.nickname is string
+          && request.resource.data.nickname.matches("[\\p{L}\\p{N} ._'-]{1,20}")
+          && request.resource.data.nickname == request.resource.data.nickname.trim()
+          && request.resource.data.nicknameKey == request.resource.data.nickname.lower()
+          && request.resource.data.joinedAt == request.time
+          && game().status != 'finished'
+          && !(uid in game().kickedUids)
+          && getAfter(/databases/$(database)/documents/games/$(gameId)/nicknames/$(request.resource.data.nicknameKey)).data.uid == uid
+          && nicknameAllowed(request.resource.data.nicknameKey);
+      }
+
+      // ---- nickname prenotati: games/{gameId}/nicknames/{nicknameKey}
+      // `create` fallisce se il documento esiste già: così due studenti non possono
+      // avere lo stesso nickname nella stessa partita.
+      match /nicknames/{nicknameKey} {
+        allow get: if signedIn();
+        allow delete: if isHost();
+        allow create: if signedIn()
+          && request.resource.data.keys().hasOnly(['uid'])
+          && request.resource.data.uid == request.auth.uid
+          && getAfter(/databases/$(database)/documents/games/$(gameId)/players/$(request.auth.uid)).data.nicknameKey == nicknameKey;
+      }
+
+      // ---- risposte: games/{gameId}/questions/{questionId}/answers/{uid}
+      match /questions/{questionId}/answers/{uid} {
+        // Lo studente legge solo la propria risposta; il docente le legge tutte.
+        allow get: if isHost() || (signedIn() && request.auth.uid == uid);
+        allow list: if isHost();
+
+        // Lo studente può CREARE solo la propria risposta, una volta sola (niente update
+        // né delete), solo se è in partita e solo mentre la domanda è aperta.
+        allow create: if signedIn()
+          && request.auth.uid == uid
+          && exists(/databases/$(database)/documents/games/$(gameId)/players/$(uid))
+          && answerAccepted(game(), questionId, request.resource.data);
+      }
+
+      function answerAccepted(g, questionId, data) {
+        return g.status == 'open'
+          && g.currentQuestionId == questionId
+          && withinTimeLimit(g, questionId)
+          && data.keys().hasOnly(['choice', 'answeredAt'])
+          && data.choice is int
+          && data.choice >= 0
+          && data.choice < g.currentOptionCount
+          // L'ora della risposta è quella del server: non si può falsificare il bonus velocità.
+          && data.answeredAt == request.time;
+      }
+
+      // Se la domanda ha un tempo limite, si accettano risposte fino a 3 secondi
+      // dopo la scadenza (tolleranza per la latenza di rete).
+      function withinTimeLimit(g, questionId) {
+        return g.currentTimeLimit == null
+          || request.time <= g.openedAt[questionId] + duration.value(g.currentTimeLimit + 3, 's');
+      }
+    }
+  }
+}

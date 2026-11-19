@@ -1,0 +1,44 @@
+{
+  "title": "Quiz di esempio: il pianeta Zorblax",
+  "questions": [
+    {
+      "id": "q1",
+      "text": "Di che colore è il cielo del pianeta immaginario Zorblax?",
+      "options": ["Blu", "Verde", "Arancione", "A pois"],
+      "correct": 1,
+      "timeLimit": 20,
+      "explanation": "Su Zorblax l'atmosfera ricca di clorofilla gassosa rende il cielo verde (fatto inventato)."
+    },
+    {
+      "id": "q2",
+      "text": "Quante lune ha Zorblax?",
+      "options": ["Nessuna", "Una", "Tre"],
+      "correct": 2,
+      "timeLimit": 15,
+      "explanation": "Le tre lune si chiamano Pim, Pum e Pam."
+    },
+    {
+      "id": "q3",
+      "text": "Quali di questi animali vivono su Zorblax?",
+      "options": ["Il gatto quadrato", "Il pesce volante a vapore", "Il cane", "La lumaca supersonica"],
+      "correct": [0, 3],
+      "timeLimit": 30,
+      "explanation": "Esempio di domanda con più risposte corrette: vale una qualsiasi delle due."
+    },
+    {
+      "id": "q4",
+      "text": "Su Zorblax un anno dura più di un anno terrestre.",
+      "options": ["Vero", "Falso"],
+      "correct": 0,
+      "explanation": "Domanda senza tempo limite: resta aperta finché il docente non chiude le risposte."
+    },
+    {
+      "id": "q5",
+      "text": "Qual è la bevanda tipica degli abitanti di Zorblax?",
+      "options": ["Succo di meteora", "Tè di nebulosa", "Acqua frizzante al neon", "Latte di cometa"],
+      "correct": 3,
+      "timeLimit": 20,
+      "explanation": "Il latte di cometa è servito freddissimo, a -200 °C."
+    }
+  ]
+}
