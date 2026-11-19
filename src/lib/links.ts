@@ -9,9 +9,12 @@ function appBaseUrl(): string {
   return `${window.location.origin}${import.meta.env.BASE_URL}`;
 }
 
-/** Link per gli studenti: è sempre lo stesso, qualunque quiz sia in onda. */
-export function studentLink(): string {
-  return `${appBaseUrl()}#/play`;
+/**
+ * Link per gli studenti: porta al quiz indicato, quando è in onda.
+ * Si può preparare prima della lezione (es. su Moodle): l'id resta lo stesso.
+ */
+export function studentLink(quizId: string): string {
+  return `${appBaseUrl()}#/play?quiz=${encodeURIComponent(quizId)}`;
 }
 
 /** Link permanente alla pagina di ripasso di un quiz. */

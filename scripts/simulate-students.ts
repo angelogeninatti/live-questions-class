@@ -1,11 +1,11 @@
 /**
- * Simula N studenti che entrano nella partita in onda e rispondono a ogni domanda
- * dopo un ritardo casuale. Serve a verificare che il pannello del docente si aggiorni
- * in tempo reale con molti partecipanti.
+ * Simula N studenti che, come chi apre il link `#/play?quiz=ID`, entrano nella partita
+ * di quel quiz quando è in onda e rispondono a ogni domanda dopo un ritardo casuale.
+ * Serve a verificare che il pannello del docente si aggiorni in tempo reale con molti partecipanti.
  *
- * Uso:
- *   npm run simulate -- 50           sugli emulatori locali (consigliato)
- *   npm run simulate -- 50 --real    sul progetto reale (legge VITE_FIREBASE_CONFIG da .env.local)
+ * Uso (ID è l'id del quiz, visibile nella libreria):
+ *   npm run simulate -- 50 --quiz=ID           sugli emulatori locali (consigliato)
+ *   npm run simulate -- 50 --quiz=ID --real    sul progetto reale (legge VITE_FIREBASE_CONFIG da .env.local)
  *
  * Attenzione con --real: ogni studente simulato crea un account anonimo, e Firebase
  * accetta al massimo circa 100 nuovi account all'ora dallo stesso indirizzo IP.
@@ -28,6 +28,11 @@ import {
 const args = process.argv.slice(2);
 const studentCount = Number(args.find((arg) => /^\d+$/.test(arg)) ?? 50);
 const useRealProject = args.includes('--real');
+const quizId = args.find((arg) => arg.startsWith('--quiz='))?.slice('--quiz='.length) ?? '';
+if (quizId === '') {
+  console.error('Indica il quiz: npm run simulate -- 50 --quiz=ID');
+  process.exit(1);
+}
 
 function readConfig(): FirebaseOptions {
   if (!useRealProject) return { apiKey: 'demo-key', projectId: 'demo-quiz' };
@@ -65,8 +70,8 @@ async function runStudent(index: number, config: FirebaseOptions): Promise<void>
   let joinedGameId: string | null = null;
   let unsubscribeGame: Unsubscribe | null = null;
 
-  onSnapshot(doc(db, 'config', 'activeGame'), (active) => {
-    const gameId = active.get('gameId') as string | undefined;
+  onSnapshot(doc(db, 'live', quizId), (live) => {
+    const gameId = live.get('gameId') as string | undefined;
     if (gameId === undefined || gameId === joinedGameId) return;
     unsubscribeGame?.();
     joinedGameId = gameId;

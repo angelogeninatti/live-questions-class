@@ -1,18 +1,20 @@
 /**
- * Vista degli studenti (`#/play`), pensata per il telefono.
+ * Vista degli studenti (`#/play?quiz=ID`), pensata per il telefono.
+ * L'id del quiz arriva dal link (QR code o Moodle): senza, non si entra in nessuna partita.
  *
  * È divisa in componenti "a cascata": ognuno aspetta i dati di cui ha bisogno
  * e poi passa la mano al successivo:
- *   StudentView (login anonimo) → StudentLobby (quale partita è in onda?)
+ *   StudentView (link e login anonimo) → StudentLobby (questo quiz è in onda?)
  *   → StudentGame (sono entrato? in che fase siamo?) → StudentQuestion (la domanda corrente).
  */
 import { useState, type ReactNode } from 'react';
+import { useSearchParams } from 'react-router';
 import { Leaderboard } from '../components/Leaderboard';
 import { NicknameForm } from '../components/NicknameForm';
 import { QuestionCard } from '../components/QuestionCard';
 import { StatusMessage } from '../components/StatusMessage';
 import { Timer } from '../components/Timer';
-import { useActiveGame } from '../hooks/useActiveGame';
+import { useLiveGame } from '../hooks/useActiveGame';
 import { useMyAnswer } from '../hooks/useAnswers';
 import { useAnonymousUser } from '../hooks/useAuth';
 import { useCountdown } from '../hooks/useCountdown';
@@ -25,10 +27,26 @@ import { submitAnswer } from '../lib/studentActions';
 import type { Answer, Game, PublicQuestion } from '../types';
 
 export function StudentView() {
+  const [searchParams] = useSearchParams();
+  const quizId = searchParams.get('quiz');
+  if (quizId === null || quizId === '') {
+    return (
+      <Shell>
+        <StatusMessage title="Link incompleto">
+          Apri il link del quiz che ti ha dato il docente (dal QR code o da Moodle).
+        </StatusMessage>
+      </Shell>
+    );
+  }
+  // `key`: se cambia il quiz nell'indirizzo, la vista riparte da zero.
+  return <SignedInLobby key={quizId} quizId={quizId} />;
+}
+
+function SignedInLobby({ quizId }: { quizId: string }) {
   const { user, error } = useAnonymousUser();
   if (error !== null) return <Shell><StatusMessage tone="error" title="Connessione non riuscita">{error}</StatusMessage></Shell>;
   if (user === null) return <Shell><StatusMessage tone="loading" title="Connessione…" /></Shell>;
-  return <StudentLobby uid={user.uid} />;
+  return <StudentLobby uid={user.uid} quizId={quizId} />;
 }
 
 /** Cornice comune: intestazione con il nickname (se già scelto) e contenuto. */
@@ -44,18 +62,19 @@ function Shell({ nickname, children }: { nickname?: string; children: ReactNode 
   );
 }
 
-function StudentLobby({ uid }: { uid: string }) {
-  const active = useActiveGame();
+function StudentLobby({ uid, quizId }: { uid: string; quizId: string }) {
+  const active = useLiveGame(quizId);
   switch (active.status) {
     case 'loading':
-      return <Shell><StatusMessage tone="loading" title="Cerco il quiz in onda…" /></Shell>;
+      return <Shell><StatusMessage tone="loading" title="Cerco il quiz…" /></Shell>;
     case 'error':
       return <Shell><StatusMessage tone="error" title="Errore">{describeError(active.error)}</StatusMessage></Shell>;
     case 'none':
       return (
         <Shell>
-          <StatusMessage title="Nessun quiz in onda">
-            Il docente non ha ancora avviato un quiz. Questa pagina si aggiornerà da sola.
+          {/* Stesso messaggio per un id inesistente: dall'esterno non si capisce se il quiz esiste. */}
+          <StatusMessage title="Quiz non in onda">
+            Il docente non ha ancora avviato questo quiz. Questa pagina si aggiornerà da sola.
           </StatusMessage>
         </Shell>
       );

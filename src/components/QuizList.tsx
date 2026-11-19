@@ -1,5 +1,5 @@
 import type { QuizSummary } from '../types';
-import { reviewLink } from '../lib/links';
+import { reviewLink, studentLink } from '../lib/links';
 import { CopyButton } from './CopyButton';
 
 /** Le azioni possibili su un quiz della libreria. */
@@ -48,6 +48,7 @@ export function QuizList({ quizzes, onAirQuizId, busy, ...actions }: QuizListPro
               <button type="button" className="button primary" disabled={busy} onClick={() => actions.onStart(quiz)}>
                 Avvia
               </button>
+              <CopyButton text={studentLink(quiz.id)} label="Copia link studenti" />
               <CopyButton text={reviewLink(quiz.id)} label="Copia link di ripasso" />
               <button type="button" className="button secondary" disabled={busy} onClick={() => actions.onTogglePublished(quiz)}>
                 {quiz.reviewPublished ? 'Nascondi soluzioni' : 'Pubblica soluzioni'}

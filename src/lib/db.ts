@@ -25,6 +25,7 @@ import type {
   ActiveGame,
   Answer,
   Game,
+  LiveGame,
   ModerationDoc,
   NicknameClaim,
   Player,
@@ -64,6 +65,7 @@ export const solutionsRef = (quizId: string) =>
 
 export const activeGameRef = () => typedDoc<ActiveGame>('config', 'activeGame');
 export const moderationRef = () => typedDoc<ModerationDoc>('config', 'moderation');
+export const liveGameRef = (quizId: string) => typedDoc<LiveGame>('live', quizId);
 
 // --- Partite ---------------------------------------------------------------
 

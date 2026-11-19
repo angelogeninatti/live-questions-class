@@ -10,7 +10,8 @@
  *
  *   quizzes/{quizId}                                   QuizDoc       parte pubblica + metadati
  *   quizzes/{quizId}/private/solutions                 SolutionsDoc  risposte corrette e spiegazioni
- *   config/activeGame                                  ActiveGame    quale partita è "in onda"
+ *   config/activeGame                                  ActiveGame    quale partita è "in onda" (solo docente)
+ *   live/{quizId}                                      LiveGame      la partita in onda di quel quiz (per gli studenti)
  *   config/moderation                                  ModerationDoc parole vietate nei nickname
  *   games/{gameId}                                     Game          stato della partita
  *   games/{gameId}/players/{uid}                       Player        un documento per studente
@@ -91,6 +92,15 @@ export type QuizToStart = Pick<QuizSummary, 'id' | 'title' | 'questions'>;
 export interface ActiveGame {
   gameId: string;
   quizId: string;
+}
+
+/**
+ * `live/{quizId}`: esiste solo per il quiz in onda e punta alla sua partita.
+ * Gli studenti arrivano qui dal link `#/play?quiz=ID`: senza l'id del quiz non
+ * possono scoprire quale partita è in onda (`config/activeGame` lo legge solo il docente).
+ */
+export interface LiveGame {
+  gameId: string;
 }
 
 /** `config/moderation`: parole vietate nei nickname, gestite dal docente e mai salvate nel repository. */

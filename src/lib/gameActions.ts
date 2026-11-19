@@ -8,11 +8,14 @@
 import { arrayUnion, doc, serverTimestamp, updateDoc, writeBatch } from 'firebase/firestore';
 import { db } from '../firebase';
 import type { ActiveGame, Game, GameStatus, LeaderboardEntry, PlayerWithUid, QuizToStart } from '../types';
-import { activeGameRef, gameRef, gamesCollection, nicknameRef, playerRef } from './db';
+import { activeGameRef, gameRef, gamesCollection, liveGameRef, nicknameRef, playerRef } from './db';
 
 /**
  * Mette in onda un quiz: crea una nuova partita e la rende quella attiva.
  * L'eventuale partita precedente viene chiusa nella stessa scrittura atomica.
+ *
+ * Due "puntatori" alla partita: `config/activeGame` per il docente e `live/{quizId}`
+ * per gli studenti, che lo trovano solo se conoscono l'id del quiz (dal link).
  */
 export async function startGame(quiz: QuizToStart, previous: ActiveGame | null): Promise<string> {
   const firstQuestion = quiz.questions[0];
@@ -36,17 +39,23 @@ export async function startGame(quiz: QuizToStart, previous: ActiveGame | null):
 
   const batch = writeBatch(db);
   batch.set(newGameRef, { ...game, createdAt: serverTimestamp() });
-  if (previous !== null) batch.update(gameRef(previous.gameId), { status: 'finished' });
+  if (previous !== null) {
+    batch.update(gameRef(previous.gameId), { status: 'finished' });
+    // Il link del quiz precedente smette di portare a una partita.
+    if (previous.quizId !== quiz.id) batch.delete(liveGameRef(previous.quizId));
+  }
   batch.set(activeGameRef(), { gameId: newGameRef.id, quizId: quiz.id });
+  batch.set(liveGameRef(quiz.id), { gameId: newGameRef.id });
   await batch.commit();
   return newGameRef.id;
 }
 
-/** Toglie dalla onda la partita: gli studenti vedranno "nessun quiz in onda". */
-export async function stopBroadcast(gameId: string): Promise<void> {
+/** Toglie dalla onda la partita: gli studenti vedranno "quiz non in onda". */
+export async function stopBroadcast(active: ActiveGame): Promise<void> {
   const batch = writeBatch(db);
-  batch.update(gameRef(gameId), { status: 'finished' });
+  batch.update(gameRef(active.gameId), { status: 'finished' });
   batch.delete(activeGameRef());
+  batch.delete(liveGameRef(active.quizId));
   await batch.commit();
 }
 

@@ -39,7 +39,8 @@ export function LibraryPage() {
         message: (
           <p>
             Chi ha il link di ripasso può leggere le risposte corrette durante la partita. Puoi avviare una copia
-            (il link di ripasso originale resta valido) oppure nascondere le soluzioni.
+            (il link di ripasso originale resta valido, ma la copia ha un nuovo link per gli studenti) oppure
+            nascondere le soluzioni.
           </p>
         ),
         choices: [

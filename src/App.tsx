@@ -3,7 +3,7 @@
  * (es. `.../#/host`). Il server (GitHub Pages) vede sempre e solo `index.html`, quindi
  * ricaricare qualsiasi pagina funziona senza errori 404.
  *
- *   #/play               studenti: il quiz in onda (link fisso, da mettere su Moodle)
+ *   #/play?quiz=ID       studenti: il quiz indicato, quando è in onda (link da mettere su Moodle)
  *   #/host               docente: libreria e partita
  *   #/review?quiz=ID     ripasso di un quiz con soluzioni pubblicate
  */

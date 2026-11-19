@@ -78,15 +78,23 @@ service cloud.firestore {
 
     // ------------------------------------------------------- configurazione
 
-    // Quale partita è in onda: tutti la leggono, solo il docente la cambia.
+    // Quale partita è in onda: solo il docente. Gli studenti non devono poter
+    // scoprire il quiz in onda senza averne il link (vedi /live sotto).
     match /config/activeGame {
-      allow get: if signedIn();
-      allow write: if isHost();
+      allow get, write: if isHost();
     }
 
     // Parole vietate nei nickname: le legge l'app dello studente per il controllo
     // preventivo, le scrive solo il docente. Non stanno nel repository pubblico.
     match /config/moderation {
+      allow get: if signedIn();
+      allow write: if isHost();
+    }
+
+    // Puntatore alla partita del quiz in onda, letto dagli studenti che arrivano
+    // dal link `#/play?quiz=ID`. Esiste solo per il quiz in onda. Nessun `list`:
+    // chi non conosce l'id del quiz non può trovarlo.
+    match /live/{quizId} {
       allow get: if signedIn();
       allow write: if isHost();
     }

@@ -56,6 +56,7 @@ async function seed(options: { status?: string; reviewPublished?: boolean; opene
     await setDoc(doc(db, 'quizzes', OTHER_QUIZ), { ...quiz, title: 'Altro quiz' });
     await setDoc(doc(db, 'quizzes', OTHER_QUIZ, 'private', 'solutions'), { byQuestion: {} });
     await setDoc(doc(db, 'config', 'activeGame'), { gameId: GAME, quizId: QUIZ });
+    await setDoc(doc(db, 'live', QUIZ), { gameId: GAME });
     await setDoc(doc(db, 'config', 'moderation'), { bannedWords: ['brutto', 'xyz'] });
     await setDoc(doc(db, 'games', GAME), {
       quizId: QUIZ,
@@ -155,9 +156,22 @@ describe('quiz e libreria', () => {
     await assertFails(updateDoc(doc(student('s1'), 'quizzes', QUIZ), { reviewPublished: true }));
   });
 
+  it('lo studente trova la partita solo conoscendo l\'id del quiz in onda', async () => {
+    await seed();
+    await assertSucceeds(getDoc(doc(student('s1'), 'live', QUIZ)));
+    // Un quiz non in onda: il documento non esiste, la lettura è permessa ma vuota.
+    await assertSucceeds(getDoc(doc(student('s1'), 'live', OTHER_QUIZ)));
+    // Senza l'id non si scopre nulla: niente elenco dei puntatori né config/activeGame.
+    await assertFails(getDocs(collection(student('s1'), 'live')));
+    await assertFails(getDoc(doc(student('s1'), 'config', 'activeGame')));
+    await assertSucceeds(getDoc(doc(host(), 'config', 'activeGame')));
+  });
+
   it('solo il docente cambia la partita in onda e il suo stato', async () => {
     await seed();
     await assertFails(setDoc(doc(student('s1'), 'config', 'activeGame'), { gameId: 'x', quizId: 'y' }));
+    await assertFails(setDoc(doc(student('s1'), 'live', OTHER_QUIZ), { gameId: GAME }));
+    await assertSucceeds(setDoc(doc(host(), 'live', OTHER_QUIZ), { gameId: GAME }));
     await assertFails(updateDoc(doc(student('s1'), 'games', GAME), { status: 'revealed' }));
     await assertSucceeds(updateDoc(doc(host(), 'games', GAME), { status: 'closed' }));
   });

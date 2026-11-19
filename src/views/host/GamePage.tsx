@@ -124,12 +124,12 @@ function LiveGame({ gameId, game }: { gameId: string; game: Game }) {
   async function handleStop() {
     const confirmed = await ask({
       title: 'Togliere il quiz dalla onda?',
-      message: <p>Gli studenti vedranno "Nessun quiz in onda". Se ti servono i risultati, esportali prima in CSV.</p>,
+      message: <p>Gli studenti vedranno "Quiz non in onda". Se ti servono i risultati, esportali prima in CSV.</p>,
       choices: [{ value: 'stop', label: 'Togli dalla onda', variant: 'danger' }],
     });
     if (confirmed === null) return;
     await run(async () => {
-      await stopBroadcast(gameId);
+      await stopBroadcast({ gameId, quizId: game.quizId });
       navigate('/host');
     });
   }
@@ -176,7 +176,7 @@ function LiveGame({ gameId, game }: { gameId: string; game: Game }) {
           ) : neverOpened ? (
             <div className="join-panel">
               <h2>Entra con il telefono</h2>
-              <QRCodeBox url={studentLink()} size={320} />
+              <QRCodeBox url={studentLink(game.quizId)} size={320} />
               <ul className="nickname-cloud">
                 {players.map((player) => (
                   <li key={player.uid}>{player.nickname}</li>
@@ -228,7 +228,7 @@ function LiveGame({ gameId, game }: { gameId: string; game: Game }) {
           {!neverOpened && (
             <details className="card">
               <summary>QR code per entrare</summary>
-              <QRCodeBox url={studentLink()} size={180} />
+              <QRCodeBox url={studentLink(game.quizId)} size={180} />
             </details>
           )}
 
