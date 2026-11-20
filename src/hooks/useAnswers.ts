@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { onSnapshot } from 'firebase/firestore';
 import { answerRef, answersCollection } from '../lib/db';
 import type { Answer, AnswerWithUid } from '../types';
-import { useDocument, type DocState } from './useFirestore';
+import { SNAPSHOT_OPTIONS, useDocument, type DocState } from './useFirestore';
 
 /**
  * Per il docente: le risposte a TUTTE le domande della partita, raggruppate per domanda.
@@ -22,7 +22,7 @@ export function useAnswers(gameId: string | null, questionIds: readonly string[]
     if (gameId === null) return;
     const unsubscribes = questionIds.map((questionId) =>
       onSnapshot(answersCollection(gameId, questionId), (snapshot) => {
-        const answers = snapshot.docs.map((doc) => ({ uid: doc.id, ...doc.data() }));
+        const answers = snapshot.docs.map((doc) => ({ uid: doc.id, ...doc.data(SNAPSHOT_OPTIONS) }));
         // Aggiornamento "funzionale": parte sempre dallo stato più recente,
         // perché più abbonamenti possono aggiornarlo quasi in contemporanea.
         setStored((previous) => ({

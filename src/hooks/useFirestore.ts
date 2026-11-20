@@ -11,7 +11,16 @@ import {
   type DocumentData,
   type DocumentReference,
   type FirestoreError,
+  type SnapshotOptions,
 } from 'firebase/firestore';
+
+/**
+ * Un `serverTimestamp()` appena scritto non ha ancora un valore finché il server non
+ * lo conferma: di norma Firestore lo restituisce come `null` (e i tipi mentirebbero).
+ * Con `estimate` riceviamo invece una stima basata sull'orologio locale, poi sostituita
+ * dal valore del server con l'aggiornamento successivo.
+ */
+export const SNAPSHOT_OPTIONS: SnapshotOptions = { serverTimestamps: 'estimate' };
 
 /** Stato di una lettura in tempo reale. `data: null` significa "il documento non esiste". */
 export type DocState<T> =
@@ -42,7 +51,7 @@ export function useDocument<T extends DocumentData>(ref: DocumentReference<T, Do
     if (ref === null) return;
     return onSnapshot(
       ref,
-      (snapshot) => setStored({ path: ref.path, state: { status: 'ready', data: snapshot.data() ?? null } }),
+      (snapshot) => setStored({ path: ref.path, state: { status: 'ready', data: snapshot.data(SNAPSHOT_OPTIONS) ?? null } }),
       (error) => setStored({ path: ref.path, state: { status: 'error', error } }),
     );
     // Il riferimento è un oggetto nuovo a ogni render, il percorso invece no:
@@ -68,7 +77,7 @@ export function useCollection<T extends DocumentData>(ref: CollectionReference<T
       (snapshot) =>
         setStored({
           path: ref.path,
-          state: { status: 'ready', items: snapshot.docs.map((doc) => ({ id: doc.id, data: doc.data() })) },
+          state: { status: 'ready', items: snapshot.docs.map((doc) => ({ id: doc.id, data: doc.data(SNAPSHOT_OPTIONS) })) },
         }),
       (error) => setStored({ path: ref.path, state: { status: 'error', error } }),
     );
