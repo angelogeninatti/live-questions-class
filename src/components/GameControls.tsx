@@ -1,4 +1,5 @@
 import type { GameStatus } from '../types';
+import './GameControls.css';
 
 interface GameControlsProps {
   status: GameStatus;

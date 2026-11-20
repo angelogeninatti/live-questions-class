@@ -9,6 +9,8 @@
  */
 import { useState, type ReactNode } from 'react';
 import { useSearchParams } from 'react-router';
+import { AppHeader } from '../components/AppHeader';
+import { FeedbackBox } from '../components/FeedbackBox';
 import { Leaderboard } from '../components/Leaderboard';
 import { NicknameForm } from '../components/NicknameForm';
 import { QuestionCard } from '../components/QuestionCard';
@@ -25,6 +27,7 @@ import { optionLetter } from '../lib/options';
 import { isCorrect, pointsFor, rankOf } from '../lib/scoring';
 import { submitAnswer } from '../lib/studentActions';
 import type { Answer, Game, PublicQuestion } from '../types';
+import './StudentView.css';
 
 export function StudentView() {
   const [searchParams] = useSearchParams();
@@ -53,10 +56,9 @@ function SignedInLobby({ quizId }: { quizId: string }) {
 function Shell({ nickname, children }: { nickname?: string; children: ReactNode }) {
   return (
     <div className="student-shell">
-      <header className="student-header">
-        <span className="brand">Quiz in aula</span>
+      <AppHeader title="Quiz in aula">
         {nickname !== undefined && <span className="student-nickname">{nickname}</span>}
-      </header>
+      </AppHeader>
       <main className="student-main">{children}</main>
     </div>
   );
@@ -203,16 +205,16 @@ interface FeedbackProps {
 /** Messaggio sotto la domanda: conferma dell'invio, attesa, oppure esito dopo la rivelazione. */
 function Feedback({ game, question, choice, answer, timeIsUp, uid }: FeedbackProps) {
   if (game.status === 'open') {
-    if (choice !== null) return <p className="feedback feedback-sent">✓ Risposta inviata! Attendi la soluzione.</p>;
-    if (timeIsUp) return <p className="feedback feedback-neutral">Tempo scaduto.</p>;
-    return <p className="feedback feedback-neutral">Tocca la risposta che ritieni corretta.</p>;
+    if (choice !== null) return <FeedbackBox tone="sent">✓ Risposta inviata! Attendi la soluzione.</FeedbackBox>;
+    if (timeIsUp) return <FeedbackBox tone="neutral">Tempo scaduto.</FeedbackBox>;
+    return <FeedbackBox tone="neutral">Tocca la risposta che ritieni corretta.</FeedbackBox>;
   }
 
   if (game.status === 'closed') {
     return (
-      <p className="feedback feedback-neutral">
+      <FeedbackBox tone="neutral">
         {choice === null ? 'Risposte chiuse: non hai risposto a questa domanda.' : 'Risposte chiuse. Attendi la soluzione…'}
-      </p>
+      </FeedbackBox>
     );
   }
 
@@ -223,28 +225,26 @@ function Feedback({ game, question, choice, answer, timeIsUp, uid }: FeedbackPro
 
   if (choice === null) {
     return (
-      <div className="feedback feedback-neutral">
+      <FeedbackBox tone="neutral">
         <p>Non hai risposto. La risposta corretta era <strong>{correctLetters}</strong>.</p>
         {scoreLine}
-      </div>
+      </FeedbackBox>
     );
   }
   if (isCorrect(choice, correct)) {
     const points =
       answer === null ? null : pointsFor(answer, correct, game.openedAt[question.id]?.toMillis(), question.timeLimit);
     return (
-      <div className="feedback feedback-correct">
-        <p className="feedback-title">Corretto! 🎉{points !== null && ` +${points} punti`}</p>
+      <FeedbackBox tone="correct" title={points === null ? 'Corretto! 🎉' : `Corretto! 🎉 +${points} punti`}>
         {scoreLine}
-      </div>
+      </FeedbackBox>
     );
   }
   return (
-    <div className="feedback feedback-wrong">
-      <p className="feedback-title">Sbagliato</p>
+    <FeedbackBox tone="wrong" title="Sbagliato">
       <p>La risposta corretta era <strong>{correctLetters}</strong>.</p>
       {scoreLine}
-    </div>
+    </FeedbackBox>
   );
 }
 

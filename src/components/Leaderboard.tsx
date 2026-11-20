@@ -1,5 +1,6 @@
 import type { LeaderboardEntry } from '../types';
 import { rankOf } from '../lib/scoring';
+import './Leaderboard.css';
 
 interface LeaderboardProps {
   entries: readonly LeaderboardEntry[];

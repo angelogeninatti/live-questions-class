@@ -4,6 +4,7 @@ import { createQuiz, replaceQuiz } from '../lib/quizActions';
 import { MAX_FILE_BYTES, splitQuiz, validateQuizJson, type ValidationResult } from '../lib/quizValidation';
 import type { QuizSummary } from '../types';
 import { QuizReviewList } from './QuizReviewList';
+import './QuizUploader.css';
 
 interface QuizUploaderProps {
   /** Se indicato, il file sostituisce questo quiz mantenendone l'id (e il link di ripasso). */

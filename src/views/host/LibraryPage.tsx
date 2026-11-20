@@ -15,6 +15,7 @@ import { describeError } from '../../lib/errors';
 import { startGame } from '../../lib/gameActions';
 import { deleteQuiz, duplicateQuiz, setReviewPublished } from '../../lib/quizActions';
 import type { QuizSummary, QuizToStart } from '../../types';
+import './LibraryPage.css';
 
 /** Pannello di caricamento: chiuso, nuovo quiz, oppure sostituzione di uno esistente. */
 type UploadPanel = { kind: 'closed' } | { kind: 'new' } | { kind: 'replace'; quiz: QuizSummary };

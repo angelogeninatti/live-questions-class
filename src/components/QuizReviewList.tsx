@@ -1,5 +1,7 @@
 import type { PublicQuestion, Solution } from '../types';
 import { optionLetter } from '../lib/options';
+import { Explanation } from './Explanation';
+import './QuizReviewList.css';
 
 interface QuizReviewListProps {
   questions: readonly PublicQuestion[];
@@ -33,11 +35,7 @@ export function QuizReviewList({ questions, solutions }: QuizReviewListProps) {
                 );
               })}
             </ul>
-            {solution !== undefined && solution.explanation !== '' && (
-              <p className="review-explanation">
-                <strong>Spiegazione:</strong> {solution.explanation}
-              </p>
-            )}
+            {solution !== undefined && <Explanation text={solution.explanation} />}
             {question.timeLimit !== null && <p className="muted small">Tempo: {question.timeLimit} s</p>}
           </li>
         );

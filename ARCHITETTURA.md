@@ -9,6 +9,7 @@ src/
   types.ts        modello dati: formato del file JSON e documenti di Firestore
   firebase.ts     inizializzazione di Firebase (configurazione da variabile d'ambiente)
   App.tsx         routing a hash: #/play?quiz=ID, #/host, #/review?quiz=ID
+  styles.css      stili globali: variabili, pulsanti, card, campi dei moduli
   views/          StudentView, HostView (+ host/LibraryPage, host/GamePage), ReviewView
   components/     componenti di presentazione: QuestionCard, AnswerChart, Timer, QRCodeBox, ...
   hooks/          letture in tempo reale: useActiveGame, useAnswers, usePlayers, useQuizLibrary, ...
@@ -19,6 +20,8 @@ src/
                     scoring.ts, csv.ts, nickname.ts                     funzioni pure
 firebase.rules    regole di sicurezza (testate in tests/firestore-rules.test.ts)
 ```
+
+Ogni componente e ogni vista ha il suo foglio di stile, con lo stesso nome e nella stessa cartella (`QuestionCard.tsx` importa `QuestionCard.css`). Quando due componenti hanno bisogno dello stesso aspetto, lo si estrae in un componente a sé (es. `FeedbackBox`, `Explanation`), invece di condividere classi CSS tra file.
 
 Il codice segue una regola semplice: **gli hook leggono, `lib/*Actions.ts` scrive, i componenti mostrano**. Ogni lettura è un abbonamento `onSnapshot`. Quando il docente scrive su Firestore, tutti i client in ascolto si aggiornano da soli, senza bisogno di un server che inoltri i messaggi.
 

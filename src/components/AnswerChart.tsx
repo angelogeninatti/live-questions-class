@@ -1,5 +1,6 @@
 import type { AnswerWithUid } from '../types';
 import { optionColorClass, optionLetter } from '../lib/options';
+import './AnswerChart.css';
 
 interface AnswerChartProps {
   options: readonly string[];

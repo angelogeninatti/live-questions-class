@@ -1,6 +1,7 @@
 import type { QuizSummary } from '../types';
 import { reviewLink, studentLink } from '../lib/links';
 import { CopyButton } from './CopyButton';
+import './QuizList.css';
 
 /** Le azioni possibili su un quiz della libreria. */
 export interface QuizActions {

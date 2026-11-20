@@ -3,6 +3,7 @@ import { useAsyncAction } from '../hooks/useAsyncAction';
 import { useBannedWords } from '../hooks/useModeration';
 import { saveBannedWords } from '../lib/moderationActions';
 import { parseBannedWordsInput } from '../lib/nickname';
+import './ModerationPanel.css';
 
 /**
  * Gestione delle parole vietate nei nickname. Il pannello è chiuso di default:

@@ -8,6 +8,7 @@ import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router';
 import { AnswerChart } from '../../components/AnswerChart';
 import { useChoiceDialog } from '../../components/ChoiceDialog';
+import { Explanation } from '../../components/Explanation';
 import { GameControls } from '../../components/GameControls';
 import { Leaderboard } from '../../components/Leaderboard';
 import { PlayerList } from '../../components/PlayerList';
@@ -35,6 +36,7 @@ import {
 import { studentLink } from '../../lib/links';
 import { computeLeaderboard } from '../../lib/scoring';
 import type { Game, PlayerWithUid } from '../../types';
+import './GamePage.css';
 
 export function GamePage() {
   const active = useActiveGame();
@@ -194,11 +196,7 @@ function LiveGame({ gameId, game }: { gameId: string; game: Game }) {
               {(game.status !== 'open' || showLiveChart) && game.status !== 'waiting' && (
                 <AnswerChart options={question.options} answers={answers} correct={revealedCorrect} />
               )}
-              {revealedCorrect !== undefined && solution !== undefined && solution.explanation !== '' && (
-                <p className="explanation">
-                  <strong>Spiegazione:</strong> {solution.explanation}
-                </p>
-              )}
+              {revealedCorrect !== undefined && solution !== undefined && <Explanation text={solution.explanation} />}
             </>
           )}
 

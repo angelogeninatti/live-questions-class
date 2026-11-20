@@ -1,5 +1,6 @@
 import { QRCodeSVG } from 'qrcode.react';
 import { CopyButton } from './CopyButton';
+import './QRCodeBox.css';
 
 interface QRCodeBoxProps {
   url: string;

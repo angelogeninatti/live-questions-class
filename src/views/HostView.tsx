@@ -5,12 +5,14 @@
  */
 import { signOut } from 'firebase/auth';
 import { NavLink, Route, Routes } from 'react-router';
+import { AppHeader } from '../components/AppHeader';
 import { LoginForm } from '../components/LoginForm';
 import { StatusMessage } from '../components/StatusMessage';
 import { auth } from '../firebase';
 import { useAuth } from '../hooks/useAuth';
 import { GamePage } from './host/GamePage';
 import { LibraryPage } from './host/LibraryPage';
+import './HostView.css';
 
 export function HostView() {
   const authState = useAuth();
@@ -28,9 +30,8 @@ export function HostView() {
 
   return (
     <div className="host-shell">
-      <header className="host-header">
-        <span className="brand">Quiz in aula · Docente</span>
-        <nav>
+      <AppHeader title="Quiz in aula · Docente">
+        <nav className="host-nav">
           <NavLink to="/host" end>
             Libreria
           </NavLink>
@@ -39,7 +40,7 @@ export function HostView() {
         <button type="button" className="button small secondary" onClick={() => void signOut(auth)}>
           Esci
         </button>
-      </header>
+      </AppHeader>
       <main className="host-main">
         <Routes>
           <Route index element={<LibraryPage />} />

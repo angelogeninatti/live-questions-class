@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import './StatusMessage.css';
 
 interface StatusMessageProps {
   title: string;

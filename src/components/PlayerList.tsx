@@ -1,4 +1,5 @@
 import type { AnswerWithUid, PlayerWithUid } from '../types';
+import './PlayerList.css';
 
 interface PlayerListProps {
   players: readonly PlayerWithUid[];

@@ -3,6 +3,7 @@ import { useAsyncAction } from '../hooks/useAsyncAction';
 import { useBannedWords } from '../hooks/useModeration';
 import { cleanNickname, containsBannedWord, NICKNAME_MAX_LENGTH, nicknameFormatError } from '../lib/nickname';
 import { joinGame } from '../lib/studentActions';
+import './NicknameForm.css';
 
 /** Chiave in sessionStorage: dopo un ricaricamento il campo è già compilato. */
 const STORAGE_KEY = 'quiz.nickname';

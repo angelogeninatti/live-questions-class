@@ -1,4 +1,5 @@
 import type { CSSProperties } from 'react';
+import './Timer.css';
 
 interface TimerProps {
   secondsLeft: number;

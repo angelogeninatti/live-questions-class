@@ -1,7 +1,10 @@
 /** Punto di ingresso: monta l'app React nella pagina. */
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
+// Gli stili globali vanno importati per primi: così i fogli dei componenti, caricati dopo,
+// possono sovrascriverne le regole.
 import './styles.css';
+import { StatusMessage } from './components/StatusMessage';
 
 const root = createRoot(document.getElementById('root')!);
 
@@ -17,9 +20,10 @@ import('./App')
   )
   .catch((error: unknown) =>
     root.render(
-      <main className="status-message status-error">
-        <h2>L'app non è configurata correttamente</h2>
-        <p>{error instanceof Error ? error.message : String(error)}</p>
+      <main>
+        <StatusMessage tone="error" title="L'app non è configurata correttamente">
+          {error instanceof Error ? error.message : String(error)}
+        </StatusMessage>
       </main>,
     ),
   );

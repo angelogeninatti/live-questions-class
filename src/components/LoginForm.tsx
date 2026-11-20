@@ -2,6 +2,7 @@ import { useState, type FormEvent } from 'react';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../firebase';
 import { useAsyncAction } from '../hooks/useAsyncAction';
+import './LoginForm.css';
 
 /** Accesso del docente con email e password (account creato a mano nella console Firebase). */
 export function LoginForm() {

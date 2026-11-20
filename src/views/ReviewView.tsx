@@ -9,6 +9,8 @@
  */
 import { useState } from 'react';
 import { useSearchParams } from 'react-router';
+import { Explanation } from '../components/Explanation';
+import { FeedbackBox } from '../components/FeedbackBox';
 import { QuestionCard } from '../components/QuestionCard';
 import { QuizReviewList } from '../components/QuizReviewList';
 import { StatusMessage } from '../components/StatusMessage';
@@ -16,6 +18,7 @@ import { useReview } from '../hooks/useReview';
 import { optionLetter } from '../lib/options';
 import { isCorrect } from '../lib/scoring';
 import type { PublicQuestion, QuizDoc, Solution, SolutionsDoc } from '../types';
+import './ReviewView.css';
 
 export function ReviewView() {
   const [searchParams] = useSearchParams();
@@ -114,27 +117,20 @@ function PracticeQuestion({ question, index, total, solution, choice, onAnswer, 
         correct={answered ? correct : undefined}
       />
 
-      {!answered && <p className="feedback feedback-neutral">Tocca la risposta che ritieni corretta.</p>}
+      {!answered && <FeedbackBox tone="neutral">Tocca la risposta che ritieni corretta.</FeedbackBox>}
 
       {answered && (
         <>
           {isCorrect(choice, correct) ? (
-            <div className="feedback feedback-correct" role="status">
-              <p className="feedback-title">Corretto! 🎉</p>
-            </div>
+            <FeedbackBox tone="correct" title="Corretto! 🎉" />
           ) : (
-            <div className="feedback feedback-wrong" role="status">
-              <p className="feedback-title">Sbagliato</p>
+            <FeedbackBox tone="wrong" title="Sbagliato">
               <p>
                 La risposta corretta era <strong>{correct.map(optionLetter).join(', ')}</strong>.
               </p>
-            </div>
+            </FeedbackBox>
           )}
-          {solution !== undefined && solution.explanation !== '' && (
-            <p className="review-explanation">
-              <strong>Spiegazione:</strong> {solution.explanation}
-            </p>
-          )}
+          {solution !== undefined && <Explanation text={solution.explanation} />}
           <div className="button-row review-next">
             <button type="button" className="button primary large" onClick={onNext}>
               {isLast ? 'Vedi tutte le soluzioni' : 'Prossima domanda'}
@@ -165,7 +161,7 @@ function Summary({ quiz, solutions, choices, onRestart }: SummaryProps) {
       <header className="review-header">
         <p className="muted">Ripasso</p>
         <h1>{quiz.title}</h1>
-        <p className="my-score no-print">
+        <p className="review-score no-print">
           Hai risposto correttamente a {correctCount} domande su {quiz.questions.length}.
         </p>
         <div className="button-row no-print">

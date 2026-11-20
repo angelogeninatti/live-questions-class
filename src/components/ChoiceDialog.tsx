@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
+import './ChoiceDialog.css';
 
 /** Un pulsante della finestra di dialogo e il valore che restituisce se viene scelto. */
 export interface DialogChoice<T extends string> {

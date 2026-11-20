@@ -1,5 +1,6 @@
 import type { PublicQuestion } from '../types';
 import { optionColorClass, optionLetter } from '../lib/options';
+import './QuestionCard.css';
 
 interface QuestionCardProps {
   question: PublicQuestion;
