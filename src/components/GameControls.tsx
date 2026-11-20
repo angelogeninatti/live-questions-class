@@ -6,6 +6,9 @@ interface GameControlsProps {
   isFirst: boolean;
   isLast: boolean;
   busy: boolean;
+  /** Prima domanda, mentre si mostra il QR code: il passo successivo è far vedere la domanda. */
+  joinPanel: boolean;
+  onShowQuestion: () => void;
   onOpen: () => void;
   onClose: () => void;
   onReveal: () => void;
@@ -15,9 +18,12 @@ interface GameControlsProps {
 
 /**
  * Pulsanti del docente. In ogni fase compare in evidenza solo il passo successivo,
- * così la sequenza "domanda → voto → soluzione → avanti" è guidata.
+ * così la sequenza "domanda → voto → soluzione → avanti" è guidata. Ogni domanda
+ * viene prima mostrata (stato `waiting`) e solo dopo aperta: c'è il tempo di leggerla
+ * prima che parta il conto alla rovescia.
  */
-export function GameControls({ status, isFirst, isLast, busy, onOpen, onClose, onReveal, onNext, onBack }: GameControlsProps) {
+export function GameControls(props: GameControlsProps) {
+  const { status, isFirst, isLast, busy, joinPanel, onShowQuestion, onOpen, onClose, onReveal, onNext, onBack } = props;
   const canGoBack = !isFirst && status !== 'open' && status !== 'finished';
   return (
     <div className="game-controls">
@@ -26,7 +32,12 @@ export function GameControls({ status, isFirst, isLast, busy, onOpen, onClose, o
           ← Indietro
         </button>
       )}
-      {status === 'waiting' && (
+      {status === 'waiting' && joinPanel && (
+        <button type="button" className="button primary large" onClick={onShowQuestion}>
+          Mostra la prima domanda
+        </button>
+      )}
+      {status === 'waiting' && !joinPanel && (
         <button type="button" className="button primary large" onClick={onOpen} disabled={busy}>
           Avvia domanda
         </button>

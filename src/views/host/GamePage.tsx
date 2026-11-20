@@ -74,6 +74,8 @@ function LiveGame({ gameId, game }: { gameId: string; game: Game }) {
   const { run, busy, error } = useAsyncAction();
   // Mostrare la distribuzione mentre si vota può influenzare chi non ha ancora risposto.
   const [showLiveChart, setShowLiveChart] = useState(true);
+  // All'inizio il palco mostra il QR code; il docente passa alla prima domanda quando la classe è entrata.
+  const [joinClosed, setJoinClosed] = useState(false);
 
   const questionId = game.currentQuestionId;
   const secondsLeft = useCountdown(game.status === 'open' ? game.openedAt[questionId] : undefined, game.currentTimeLimit);
@@ -99,6 +101,7 @@ function LiveGame({ gameId, game }: { gameId: string; game: Game }) {
   const leaderboard = computeLeaderboard(game, questions, players, answersByQuestion);
   const isLast = game.currentIndex === questions.length - 1;
   const neverOpened = game.status === 'waiting' && game.currentIndex === 0 && game.openedAt[questionId] === undefined;
+  const showJoinPanel = neverOpened && !joinClosed;
 
   // --- comandi --------------------------------------------------------------
 
@@ -175,7 +178,7 @@ function LiveGame({ gameId, game }: { gameId: string; game: Game }) {
               <h2>Classifica finale</h2>
               <Leaderboard entries={game.leaderboard} limit={10} />
             </div>
-          ) : neverOpened ? (
+          ) : showJoinPanel ? (
             <div className="join-panel">
               <h2>Entra con il telefono</h2>
               <QRCodeBox url={studentLink(game.quizId)} size={320} />
@@ -206,6 +209,8 @@ function LiveGame({ gameId, game }: { gameId: string; game: Game }) {
               isFirst={game.currentIndex === 0}
               isLast={isLast}
               busy={busy || (game.status === 'closed' && solution === undefined)}
+              joinPanel={showJoinPanel}
+              onShowQuestion={() => setJoinClosed(true)}
               onOpen={() => void run(() => openQuestion(gameId, questionId))}
               onClose={() => void run(() => closeAnswers(gameId))}
               onReveal={handleReveal}
@@ -223,7 +228,7 @@ function LiveGame({ gameId, game }: { gameId: string; game: Game }) {
             </section>
           )}
 
-          {!neverOpened && (
+          {!showJoinPanel && (
             <details className="card">
               <summary>QR code per entrare</summary>
               <QRCodeBox url={studentLink(game.quizId)} size={180} />
