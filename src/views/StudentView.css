@@ -1,0 +1,37 @@
+.student-shell {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.student-nickname {
+  padding: 0.2em 0.7em;
+  border-radius: 999px;
+  background: rgb(255 255 255 / 20%);
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.student-main {
+  flex: 1;
+  width: 100%;
+  max-width: 40rem;
+  margin: 0 auto;
+  padding: 1rem;
+}
+
+.my-score {
+  font-weight: 700;
+  font-size: 1.1rem;
+}
+
+.final-results {
+  margin-top: 1rem;
+  text-align: center;
+}
+
+.final-results .leaderboard {
+  text-align: left;
+}

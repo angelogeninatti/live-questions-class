@@ -1,0 +1,35 @@
+/* Riquadro sotto la domanda: istruzioni, conferma dell'invio o esito della risposta */
+.feedback {
+  margin: 1rem 0;
+  padding: 1rem;
+  border-radius: var(--radius);
+  text-align: center;
+  font-weight: 600;
+}
+
+.feedback p {
+  margin: 0.25rem 0;
+}
+
+.feedback-title {
+  font-size: 1.4rem;
+}
+
+.feedback-sent {
+  background: #e0e7ff;
+  color: var(--color-primary-dark);
+}
+
+.feedback-neutral {
+  background: #eceef6;
+}
+
+.feedback-correct {
+  background: var(--color-success-bg);
+  color: #14532d;
+}
+
+.feedback-wrong {
+  background: var(--color-error-bg);
+  color: #7f1d1d;
+}

@@ -1,0 +1,47 @@
+/* Grafico delle risposte: una barra per opzione */
+.answer-chart {
+  list-style: none;
+  padding: 0;
+  margin: 1rem 0;
+  display: grid;
+  gap: 0.6rem;
+}
+
+.chart-row {
+  display: grid;
+  grid-template-columns: 2.5rem 1fr 3.5rem;
+  align-items: center;
+  gap: 0.75rem;
+  transition: opacity 0.3s;
+}
+
+.chart-row.dimmed {
+  opacity: 0.35;
+}
+
+.chart-letter {
+  display: grid;
+  place-items: center;
+  height: 2.5rem;
+  border-radius: 8px;
+  color: #fff;
+  font-weight: 700;
+}
+
+.chart-track {
+  height: 2.5rem;
+  background: #e8eaf3;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.chart-bar {
+  height: 100%;
+  min-width: 4px;
+  transition: width 0.4s ease-out; /* le barre "crescono" a ogni nuova risposta */
+}
+
+.chart-count {
+  font-size: 1.3rem;
+  font-weight: 700;
+}

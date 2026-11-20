@@ -1,0 +1,63 @@
+/* Elenco di domande e soluzioni (ripasso e anteprima dopo il caricamento) */
+
+.review-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 1rem;
+}
+
+.review-item {
+  background: var(--color-surface);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 1rem 1.25rem;
+  break-inside: avoid; /* in stampa una domanda non si spezza tra due pagine */
+}
+
+.review-item h3 {
+  font-size: 1.1rem;
+}
+
+.review-number {
+  color: var(--color-muted);
+}
+
+.review-options {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 0.75rem;
+  display: grid;
+  gap: 0.4rem;
+}
+
+.review-option {
+  display: flex;
+  gap: 0.6rem;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+}
+
+.review-option.correct {
+  border: 2px solid var(--color-success);
+  background: var(--color-success-bg);
+  font-weight: 600;
+}
+
+.review-letter {
+  font-weight: 700;
+  color: var(--color-muted);
+}
+
+@media print {
+  .review-item {
+    box-shadow: none;
+    border: 1px solid #999;
+  }
+
+  .review-option.correct {
+    background: none;
+  }
+}

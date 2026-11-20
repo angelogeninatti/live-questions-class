@@ -1,0 +1,7 @@
+.uploader {
+  margin: 1rem 0;
+}
+
+.uploader input[type='file'] {
+  margin: 0.5rem 0;
+}

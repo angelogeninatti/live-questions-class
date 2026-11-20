@@ -1,0 +1,27 @@
+/* Timer circolare: il bordo colorato si accorcia con il tempo (variabile --progress tra 0 e 1) */
+.timer {
+  --size: 64px;
+  display: grid;
+  place-items: center;
+  width: var(--size);
+  height: var(--size);
+  margin: 0 auto 0.75rem;
+  border-radius: 50%;
+  background: conic-gradient(var(--color-primary) calc(var(--progress) * 360deg), var(--color-border) 0);
+  font-weight: 700;
+  font-size: 1.4rem;
+}
+
+.timer span {
+  display: grid;
+  place-items: center;
+  width: calc(var(--size) - 12px);
+  height: calc(var(--size) - 12px);
+  border-radius: 50%;
+  background: var(--color-surface);
+}
+
+.timer-urgent {
+  background: conic-gradient(var(--color-danger) calc(var(--progress) * 360deg), var(--color-border) 0);
+  color: var(--color-danger);
+}

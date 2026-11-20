@@ -1,0 +1,14 @@
+/* Barra colorata in cima alle pagine di studenti e docente */
+.app-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.75rem 1rem;
+  background: var(--color-primary);
+  color: #fff;
+}
+
+.app-header-title {
+  font-weight: 700;
+}

@@ -1,0 +1,15 @@
+/* Elenco dei partecipanti, con il pulsante per espellerli */
+.player-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  max-height: 20rem;
+  overflow-y: auto;
+}
+
+.player-list li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--color-border);
+}

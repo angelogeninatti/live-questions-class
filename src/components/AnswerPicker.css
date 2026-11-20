@@ -1,0 +1,4 @@
+/* Pulsante "Invia risposta": a tutta larghezza, comodo da toccare sul telefono */
+.answer-submit .button {
+  width: 100%;
+}

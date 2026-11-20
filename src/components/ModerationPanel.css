@@ -1,0 +1,7 @@
+.moderation-panel {
+  margin: 1rem 0;
+}
+
+.moderation-editor textarea {
+  font-family: ui-monospace, monospace;
+}

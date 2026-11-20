@@ -1,0 +1,122 @@
+/* Partita in onda: caratteri grandi, leggibili dal fondo dell'aula */
+.game-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.game-header h1 {
+  margin: 0;
+}
+
+.game-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+  font-size: 1.2rem;
+}
+
+.game-layout {
+  display: grid;
+  gap: 1rem;
+}
+
+.game-stage {
+  background: var(--color-surface);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 1.5rem;
+}
+
+.game-stage .question-text {
+  font-size: clamp(1.5rem, 2.6vw, 2.6rem);
+}
+
+.game-stage .option {
+  font-size: clamp(1.1rem, 1.8vw, 1.7rem);
+  min-height: 80px;
+}
+
+.stage-top:empty {
+  display: none;
+}
+
+.game-stage .timer {
+  --size: 96px;
+  font-size: 2rem;
+}
+
+/* Sul proiettore la spiegazione è più grande e segnata da una barra laterale */
+.game-stage .explanation {
+  margin: 1rem 0;
+  padding: 1rem;
+  border-left: 4px solid var(--color-primary);
+  border-radius: 0 10px 10px 0;
+  font-size: 1.15rem;
+}
+
+.join-panel {
+  text-align: center;
+}
+
+.join-panel h2 {
+  font-size: 2rem;
+}
+
+.join-panel .qr-url {
+  font-size: 1.5rem;
+}
+
+.nickname-cloud {
+  list-style: none;
+  padding: 0;
+  margin: 1.5rem 0 0;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.nickname-cloud li {
+  padding: 0.3em 0.9em;
+  border-radius: 999px;
+  background: #e0e7ff;
+  font-weight: 600;
+  font-size: 1.1rem;
+}
+
+.final-board {
+  max-width: 40rem;
+  margin: 0 auto;
+  font-size: 1.3rem;
+}
+
+.final-board h2 {
+  text-align: center;
+  font-size: 2.2rem;
+}
+
+.game-sidebar {
+  display: grid;
+  gap: 1rem;
+  align-content: start;
+}
+
+.sidebar-actions {
+  display: grid;
+  gap: 0.75rem;
+}
+
+/* Schermi larghi (PC collegato al proiettore): area principale + barra laterale */
+@media (min-width: 1000px) {
+  .game-layout {
+    grid-template-columns: 1fr 20rem;
+  }
+
+  .game-stage .option-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
