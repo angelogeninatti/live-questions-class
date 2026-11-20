@@ -77,7 +77,7 @@ export function QuizUploader({ replacing, onDone, onCancel }: QuizUploaderProps)
           <h3>
             {result.quiz.title} · {result.quiz.questions.length} domande
           </h3>
-          <QuizReviewList questions={preview.questions} solutions={preview.solutions} />
+          <QuizReviewList questions={preview.questions} solutions={preview.solutions} showTimeLimit />
         </>
       )}
 

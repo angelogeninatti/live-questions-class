@@ -31,6 +31,7 @@ export async function startGame(quiz: QuizToStart, previous: ActiveGame | null):
     currentQuestionId: firstQuestion.id,
     currentOptionCount: firstQuestion.options.length,
     currentTimeLimit: firstQuestion.timeLimit,
+    currentMultipleAnswers: firstQuestion.multipleAnswers,
     openedAt: {},
     revealed: {},
     leaderboard: [],
@@ -105,6 +106,7 @@ export async function goToQuestion(gameId: string, game: Game, quiz: QuizToStart
     currentQuestionId: question.id,
     currentOptionCount: question.options.length,
     currentTimeLimit: question.timeLimit,
+    currentMultipleAnswers: question.multipleAnswers,
   });
 }
 

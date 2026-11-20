@@ -31,7 +31,10 @@ export interface QuestionFile {
   text: string;
   /** Da 2 a 4 opzioni. */
   options: string[];
-  /** Indice (da 0) dell'opzione corretta, oppure più indici se le corrette sono più d'una. */
+  /**
+   * Indice (da 0) dell'opzione corretta, oppure più indici se le corrette sono più d'una:
+   * in quel caso lo studente deve selezionarle tutte (e solo quelle) per avere la risposta giusta.
+   */
   correct: number | number[];
   /** Secondi a disposizione; se assente la domanda resta aperta finché il docente la chiude. */
   timeLimit?: number;
@@ -56,6 +59,11 @@ export interface PublicQuestion {
   options: string[];
   /** `null` = nessun limite di tempo (Firestore non accetta `undefined`). */
   timeLimit: number | null;
+  /**
+   * `true` se le risposte corrette sono più di una. Lo studente lo deve sapere per
+   * selezionarle tutte prima di inviare; quali siano resta segreto fino alla rivelazione.
+   */
+  multipleAnswers: boolean;
 }
 
 /** `quizzes/{quizId}`: metadati del quiz e domande senza soluzioni. */
@@ -141,6 +149,8 @@ export interface Game {
   currentQuestionId: string;
   currentOptionCount: number;
   currentTimeLimit: number | null;
+  /** Se `false` le regole accettano una sola opzione per risposta. */
+  currentMultipleAnswers: boolean;
 
   /** Istante di apertura di ogni domanda (serve per timer e bonus velocità). */
   openedAt: Record<string, Timestamp>;
@@ -166,8 +176,8 @@ export interface NicknameClaim {
 
 /** `games/{gameId}/questions/{questionId}/answers/{uid}`: risposta di uno studente. */
 export interface Answer {
-  /** Indice dell'opzione scelta. */
-  choice: number;
+  /** Indici delle opzioni scelte, in ordine crescente: uno solo se la domanda ha una sola risposta corretta. */
+  choices: number[];
   /** Ora del server al momento dell'invio (le regole impediscono di falsificarla). */
   answeredAt: Timestamp;
 }

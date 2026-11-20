@@ -130,6 +130,12 @@ function questionIdAt(data: unknown, index: number): string | undefined {
   return typeof id === 'string' ? id : undefined;
 }
 
+/** Le risposte corrette di una domanda come elenco ordinato, anche se nel file è un solo numero. */
+function correctIndexes(question: QuestionFile): number[] {
+  const indexes = Array.isArray(question.correct) ? question.correct : [question.correct];
+  return [...indexes].sort((a, b) => a - b);
+}
+
 /**
  * Separa un quiz valido nelle due parti salvate su Firestore:
  * le domande pubbliche (leggibili dagli studenti) e le soluzioni (protette).
@@ -143,14 +149,12 @@ export function splitQuiz(quiz: QuizFile): {
     text: question.text,
     options: question.options,
     timeLimit: question.timeLimit ?? null,
+    multipleAnswers: correctIndexes(question).length > 1,
   }));
   const solutions = Object.fromEntries(
     quiz.questions.map((question) => [
       question.id,
-      {
-        correct: Array.isArray(question.correct) ? question.correct : [question.correct],
-        explanation: question.explanation ?? '',
-      },
+      { correct: correctIndexes(question), explanation: question.explanation ?? '' },
     ]),
   );
   return { questions, solutions };

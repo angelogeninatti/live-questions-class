@@ -6,13 +6,15 @@ import './QuizReviewList.css';
 interface QuizReviewListProps {
   questions: readonly PublicQuestion[];
   solutions: Readonly<Record<string, Solution>>;
+  /** Mostra il tempo limite di ogni domanda: utile al docente, non agli studenti. */
+  showTimeLimit?: boolean;
 }
 
 /**
  * Elenco completo di domande, risposte corrette e spiegazioni.
  * Usato dalla pagina di ripasso e dall'anteprima dopo l'upload.
  */
-export function QuizReviewList({ questions, solutions }: QuizReviewListProps) {
+export function QuizReviewList({ questions, solutions, showTimeLimit = false }: QuizReviewListProps) {
   return (
     <ol className="review-list">
       {questions.map((question, index) => {
@@ -36,7 +38,7 @@ export function QuizReviewList({ questions, solutions }: QuizReviewListProps) {
               })}
             </ul>
             {solution !== undefined && <Explanation text={solution.explanation} />}
-            {question.timeLimit !== null && <p className="muted small">Tempo: {question.timeLimit} s</p>}
+            {showTimeLimit && question.timeLimit !== null && <p className="muted small">Tempo: {question.timeLimit} s</p>}
           </li>
         );
       })}

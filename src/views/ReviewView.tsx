@@ -9,13 +9,14 @@
  */
 import { useState } from 'react';
 import { useSearchParams } from 'react-router';
+import { AnswerPicker } from '../components/AnswerPicker';
+import { CorrectAnswer } from '../components/CorrectAnswer';
 import { Explanation } from '../components/Explanation';
 import { FeedbackBox } from '../components/FeedbackBox';
-import { QuestionCard } from '../components/QuestionCard';
 import { QuizReviewList } from '../components/QuizReviewList';
 import { StatusMessage } from '../components/StatusMessage';
 import { useReview } from '../hooks/useReview';
-import { optionLetter } from '../lib/options';
+import { answerInstructions } from '../lib/options';
 import { isCorrect } from '../lib/scoring';
 import type { PublicQuestion, QuizDoc, Solution, SolutionsDoc } from '../types';
 import './ReviewView.css';
@@ -44,8 +45,8 @@ export function ReviewView() {
   );
 }
 
-/** Le risposte date finora: per ogni domanda (nell'ordine del quiz) l'opzione scelta. */
-type Choices = readonly number[];
+/** Le risposte date finora: per ogni domanda (nell'ordine del quiz) le opzioni scelte. */
+type Choices = readonly (readonly number[])[];
 
 function ReviewSession({ quiz, solutions }: { quiz: QuizDoc; solutions: SolutionsDoc }) {
   const [choices, setChoices] = useState<Choices>([]);
@@ -70,15 +71,15 @@ function ReviewSession({ quiz, solutions }: { quiz: QuizDoc; solutions: Solution
         <p className="muted">Ripasso</p>
         <h1>{quiz.title}</h1>
       </header>
-      {/* `key`: a ogni nuova domanda il componente riparte senza scelta. */}
+      {/* `key`: a ogni nuova domanda il componente riparte senza selezione. */}
       <PracticeQuestion
         key={question.id}
         question={question}
         index={step}
         total={questions.length}
         solution={solutions.byQuestion[question.id]}
-        choice={choices[step] ?? null}
-        onAnswer={(choice) => setChoices((previous) => [...previous.slice(0, step), choice])}
+        submitted={choices[step] ?? null}
+        onSubmit={(selected) => setChoices((previous) => [...previous.slice(0, step), selected])}
         onNext={() => {
           setStep((current) => current + 1);
           window.scrollTo(0, 0);
@@ -93,40 +94,39 @@ interface PracticeQuestionProps {
   index: number;
   total: number;
   solution: Solution | undefined;
-  /** Opzione scelta, `null` finché lo studente non risponde. */
-  choice: number | null;
-  onAnswer: (choice: number) => void;
+  /** Opzioni inviate, `null` finché lo studente non risponde. */
+  submitted: readonly number[] | null;
+  onSubmit: (choices: number[]) => void;
   onNext: () => void;
 }
 
 /** Una domanda del ripasso: si risponde una volta sola e la soluzione compare subito. */
-function PracticeQuestion({ question, index, total, solution, choice, onAnswer, onNext }: PracticeQuestionProps) {
+function PracticeQuestion({ question, index, total, solution, submitted, onSubmit, onNext }: PracticeQuestionProps) {
   const correct = solution?.correct ?? [];
-  const answered = choice !== null;
   const isLast = index === total - 1;
 
   return (
     <div className="student-question">
-      <QuestionCard
+      <AnswerPicker
         question={question}
         index={index}
         total={total}
-        onSelect={onAnswer}
-        disabled={answered}
-        selected={choice}
-        correct={answered ? correct : undefined}
+        submitted={submitted}
+        canAnswer
+        correct={submitted !== null ? correct : undefined}
+        onSubmit={onSubmit}
       />
 
-      {!answered && <FeedbackBox tone="neutral">Tocca la risposta che ritieni corretta.</FeedbackBox>}
+      {submitted === null && <FeedbackBox tone="neutral">{answerInstructions(question)}</FeedbackBox>}
 
-      {answered && (
+      {submitted !== null && (
         <>
-          {isCorrect(choice, correct) ? (
+          {isCorrect(submitted, correct) ? (
             <FeedbackBox tone="correct" title="Corretto! 🎉" />
           ) : (
             <FeedbackBox tone="wrong" title="Sbagliato">
               <p>
-                La risposta corretta era <strong>{correct.map(optionLetter).join(', ')}</strong>.
+                <CorrectAnswer correct={correct} />
               </p>
             </FeedbackBox>
           )}
@@ -152,8 +152,8 @@ interface SummaryProps {
 /** Fine del ripasso: quante risposte corrette, poi tutte le domande con le soluzioni. */
 function Summary({ quiz, solutions, choices, onRestart }: SummaryProps) {
   const correctCount = quiz.questions.filter((question, index) => {
-    const choice = choices[index];
-    return choice !== undefined && isCorrect(choice, solutions.byQuestion[question.id]?.correct);
+    const selected = choices[index];
+    return selected !== undefined && isCorrect(selected, solutions.byQuestion[question.id]?.correct);
   }).length;
 
   return (

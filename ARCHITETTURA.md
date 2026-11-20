@@ -37,7 +37,7 @@ Il codice segue una regola semplice: **gli hook leggono, `lib/*Actions.ts` scriv
 | `games/{gameId}` | fase, domanda corrente, soluzioni già rivelate, classifica | utenti autenticati | docente |
 | `games/{gameId}/players/{uid}` | nickname | il diretto interessato, docente | lo studente crea solo il proprio |
 | `games/{gameId}/nicknames/{nome}` | "prenotazione" del nickname, per l'unicità | utenti autenticati | lo studente, solo se libero |
-| `games/{gameId}/questions/{qId}/answers/{uid}` | opzione scelta e ora del server | il diretto interessato, docente | lo studente: una volta sola, solo a domanda aperta |
+| `games/{gameId}/questions/{qId}/answers/{uid}` | opzioni scelte e ora del server | il diretto interessato, docente | lo studente: una volta sola, solo a domanda aperta |
 
 Gli id dei quiz hanno 10 caratteri casuali, generati con `crypto.getRandomValues` (circa 10^15 combinazioni). Sono brevi da condividere ma impossibili da indovinare.
 
@@ -60,11 +60,12 @@ studenti: confrontano la propria risposta con revealed[q] → "Corretto!" / "Sba
 - **Identità degli studenti.** Ogni studente entra con un account anonimo di Firebase, che il browser ricorda. Se ricarica la pagina ritrova lo stesso uid, quindi la sua partita e le risposte già date.
 - **Integrità del punteggio.** L'ora di ogni risposta è quella del server: le regole impongono `answeredAt == request.time`. Il docente calcola la classifica da zero a ogni rivelazione, con una funzione pura (`computeLeaderboard`), poi la copia nel documento della partita. Così il risultato resta coerente anche quando si torna indietro di una domanda.
 - **Nickname.** Un nickname è unico se il documento `nicknames/{nome}` si riesce a creare: due studenti non possono crearlo entrambi. Le parole vietate non stanno nel repository, che è pubblico, ma su Firestore. L'app le confronta in modo tollerante (accenti, cifre al posto di lettere, lettere ripetute). Le regole ripetono il controllo parola per parola, nel caso qualcuno scriva nel database senza passare dall'app. Resta comunque la possibilità di espellere un partecipante.
+- **Domande con più risposte corrette.** Lo studente seleziona le opzioni e poi preme "Invia risposta"; la risposta è corretta solo se coincide esattamente con le opzioni corrette. Per mostrare questa modalità, la parte pubblica della domanda dice soltanto *che* le corrette sono più d'una (`multipleAnswers`), non quali. Le regole accettano più opzioni solo per queste domande.
 - **Routing a hash** (`#/...`). GitHub Pages serve solo file statici. Con l'hash il server riceve sempre `index.html`, quindi ricaricare una pagina non dà mai 404.
 - **Validazione dell'upload con zod.** Lo schema è annotato con i tipi di `types.ts`: se tipi e schema divergono, il compilatore segnala l'errore. Il file viene validato per intero prima di qualsiasi scrittura su Firestore.
 
 ## Verifiche
 
-- `npm run test:rules` avvia l'emulatore di Firestore ed esegue 28 test delle regole (lettura delle soluzioni, risposte doppie o fuori tempo, nickname duplicati o vietati, ...).
+- `npm run test:rules` avvia l'emulatore di Firestore ed esegue 33 test delle regole (lettura delle soluzioni, risposte doppie o fuori tempo, nickname duplicati o vietati, ...).
 - `npm run emulators`, poi `npm run seed:emulator` e `npm run dev:emulator`: l'app gira in locale, senza toccare il progetto reale.
 - `npm run simulate -- 50 --quiz=ID` fa entrare 50 studenti simulati, che rispondono a ogni domanda.

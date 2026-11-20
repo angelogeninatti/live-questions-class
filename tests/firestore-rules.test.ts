@@ -40,8 +40,14 @@ const host = () => env.authenticatedContext(HOST_UID, { firebase: { sign_in_prov
 const student = (uid: string) => env.authenticatedContext(uid, { firebase: { sign_in_provider: 'anonymous' } }).firestore();
 const visitor = () => env.unauthenticatedContext().firestore();
 
-/** Prepara un quiz in onda con una partita alla prima domanda, nello stato indicato. */
-async function seed(options: { status?: string; reviewPublished?: boolean; openedSecondsAgo?: number } = {}) {
+/**
+ * Prepara un quiz in onda con una partita alla prima domanda, nello stato indicato.
+ * Con `multipleAnswers` la domanda corrente ha più risposte corrette.
+ */
+async function seed(
+  options: { status?: string; reviewPublished?: boolean; openedSecondsAgo?: number; multipleAnswers?: boolean } = {},
+) {
+  const multipleAnswers = options.multipleAnswers ?? false;
   await env.withSecurityRulesDisabled(async (context) => {
     const db = context.firestore();
     const quiz = {
@@ -49,10 +55,10 @@ async function seed(options: { status?: string; reviewPublished?: boolean; opene
       reviewPublished: options.reviewPublished ?? false,
       createdAt: Timestamp.now(),
       updatedAt: Timestamp.now(),
-      questions: [{ id: 'q1', text: 'Domanda?', options: ['A', 'B', 'C'], timeLimit: 20 }],
+      questions: [{ id: 'q1', text: 'Domanda?', options: ['A', 'B', 'C'], timeLimit: 20, multipleAnswers }],
     };
     await setDoc(doc(db, 'quizzes', QUIZ), quiz);
-    await setDoc(doc(db, 'quizzes', QUIZ, 'private', 'solutions'), { byQuestion: { q1: { correct: [1], explanation: '' } } });
+    await setDoc(doc(db, 'quizzes', QUIZ, 'private', 'solutions'), { byQuestion: { q1: { correct: multipleAnswers ? [0, 2] : [1], explanation: '' } } });
     await setDoc(doc(db, 'quizzes', OTHER_QUIZ), { ...quiz, title: 'Altro quiz' });
     await setDoc(doc(db, 'quizzes', OTHER_QUIZ, 'private', 'solutions'), { byQuestion: {} });
     await setDoc(doc(db, 'config', 'activeGame'), { gameId: GAME, quizId: QUIZ });
@@ -68,6 +74,7 @@ async function seed(options: { status?: string; reviewPublished?: boolean; opene
       currentQuestionId: 'q1',
       currentOptionCount: 3,
       currentTimeLimit: 20,
+      currentMultipleAnswers: multipleAnswers,
       openedAt: { q1: Timestamp.fromMillis(Date.now() - (options.openedSecondsAgo ?? 1) * 1000) },
       revealed: {},
       leaderboard: [],
@@ -93,8 +100,12 @@ async function seedPlayer(uid: string, nickname: string) {
   });
 }
 
-const answer = (db: ReturnType<typeof student>, uid: string, choice: number, questionId = 'q1') =>
-  setDoc(doc(db, 'games', GAME, 'questions', questionId, 'answers', uid), { choice, answeredAt: serverTimestamp() });
+/** Risposta come la invia l'app: una o più opzioni (un numero solo vale come `[numero]`). */
+const answer = (db: ReturnType<typeof student>, uid: string, choices: number | number[], questionId = 'q1') =>
+  setDoc(doc(db, 'games', GAME, 'questions', questionId, 'answers', uid), {
+    choices: typeof choices === 'number' ? [choices] : choices,
+    answeredAt: serverTimestamp(),
+  });
 
 before(async () => {
   setLogLevel('silent'); // i rifiuti attesi verrebbero altrimenti stampati come errori
@@ -268,6 +279,32 @@ describe('risposte', () => {
     await assertFails(answer(student('s1'), 's1', -1));
   });
 
+  it('una risposta vuota viene rifiutata', async () => {
+    await seed({ multipleAnswers: true });
+    await seedPlayer('s1', 'Mario');
+    await assertFails(answer(student('s1'), 's1', []));
+  });
+
+  it('con una sola risposta corretta non si possono scegliere più opzioni', async () => {
+    await seed();
+    await seedPlayer('s1', 'Mario');
+    await assertFails(answer(student('s1'), 's1', [0, 1]));
+  });
+
+  it('con più risposte corrette si inviano più opzioni insieme', async () => {
+    await seed({ multipleAnswers: true });
+    await seedPlayer('s1', 'Mario');
+    await assertSucceeds(answer(student('s1'), 's1', [0, 2]));
+  });
+
+  it('con più risposte corrette, opzioni ripetute o inesistenti vengono rifiutate', async () => {
+    await seed({ multipleAnswers: true });
+    await seedPlayer('s1', 'Mario');
+    await assertFails(answer(student('s1'), 's1', [1, 1]));
+    await assertFails(answer(student('s1'), 's1', [0, 3]));
+    await assertFails(answer(student('s1'), 's1', [0, 1, 2, 3]));
+  });
+
   it('una risposta entro la tolleranza di 3 secondi dopo la scadenza è accettata', async () => {
     await seed({ openedSecondsAgo: 21 }); // tempo limite 20 s
     await seedPlayer('s1', 'Mario');
@@ -285,7 +322,7 @@ describe('risposte', () => {
     await seedPlayer('s1', 'Mario');
     const db = student('s1');
     await assertFails(
-      setDoc(doc(db, 'games', GAME, 'questions', 'q1', 'answers', 's1'), { choice: 0, answeredAt: Timestamp.fromMillis(0) }),
+      setDoc(doc(db, 'games', GAME, 'questions', 'q1', 'answers', 's1'), { choices: [0], answeredAt: Timestamp.fromMillis(0) }),
     );
   });
 

@@ -39,10 +39,10 @@ export function buildResultsCsv(
         continue;
       }
       const correct = game.revealed[question.id];
-      const outcome = correct === undefined ? 'non rivelata' : isCorrect(answer.choice, correct) ? 'corretta' : 'sbagliata';
+      const outcome = correct === undefined ? 'non rivelata' : isCorrect(answer.choices, correct) ? 'corretta' : 'sbagliata';
       const seconds =
         openedAt === undefined ? '' : ((answer.answeredAt.toMillis() - openedAt.toMillis()) / 1000).toFixed(1).replace('.', ',');
-      row.push(optionLetter(answer.choice), outcome, seconds);
+      row.push(answer.choices.map(optionLetter).join(', '), outcome, seconds);
     }
     return row;
   });

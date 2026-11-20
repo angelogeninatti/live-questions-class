@@ -164,12 +164,21 @@ service cloud.firestore {
         return g.status == 'open'
           && g.currentQuestionId == questionId
           && withinTimeLimit(g, questionId)
-          && data.keys().hasOnly(['choice', 'answeredAt'])
-          && data.choice is int
-          && data.choice >= 0
-          && data.choice < g.currentOptionCount
+          && data.keys().hasOnly(['choices', 'answeredAt'])
+          && validChoices(g, data.choices)
           // L'ora della risposta è quella del server: non si può falsificare il bonus velocità.
           && data.answeredAt == request.time;
+      }
+
+      // Opzioni scelte: almeno una, senza ripetizioni, tutte esistenti (gli indici
+      // validi sono i primi `currentOptionCount` di 0, 1, 2, 3). Più di una solo
+      // se la domanda ha più risposte corrette.
+      function validChoices(g, choices) {
+        return choices is list
+          && choices.size() >= 1
+          && (choices.size() == 1 || g.currentMultipleAnswers == true)
+          && choices.toSet().size() == choices.size()
+          && choices.hasOnly([0, 1, 2, 3][0:g.currentOptionCount]);
       }
 
       // Se la domanda ha un tempo limite, si accettano risposte fino a 3 secondi

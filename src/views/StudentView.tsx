@@ -9,11 +9,12 @@
  */
 import { useState, type ReactNode } from 'react';
 import { useSearchParams } from 'react-router';
+import { AnswerPicker } from '../components/AnswerPicker';
 import { AppHeader } from '../components/AppHeader';
+import { CorrectAnswer } from '../components/CorrectAnswer';
 import { FeedbackBox } from '../components/FeedbackBox';
 import { Leaderboard } from '../components/Leaderboard';
 import { NicknameForm } from '../components/NicknameForm';
-import { QuestionCard } from '../components/QuestionCard';
 import { StatusMessage } from '../components/StatusMessage';
 import { Timer } from '../components/Timer';
 import { useLiveGame } from '../hooks/useActiveGame';
@@ -23,7 +24,7 @@ import { useCountdown } from '../hooks/useCountdown';
 import { useMyPlayer } from '../hooks/usePlayers';
 import { useQuiz } from '../hooks/useQuiz';
 import { describeError } from '../lib/errors';
-import { optionLetter } from '../lib/options';
+import { answerInstructions } from '../lib/options';
 import { isCorrect, pointsFor, rankOf } from '../lib/scoring';
 import { submitAnswer } from '../lib/studentActions';
 import type { Answer, Game, PublicQuestion } from '../types';
@@ -152,22 +153,22 @@ function StudentQuestion({ uid, gameId, game, question }: StudentQuestionProps) 
   const myAnswer = useMyAnswer(gameId, question.id, uid);
   const openedAt = game.openedAt[question.id];
   const secondsLeft = useCountdown(game.status === 'open' ? openedAt : undefined, game.currentTimeLimit);
-  // Scelta appena toccata, mostrata subito mentre la scrittura viaggia verso il server.
-  const [pendingChoice, setPendingChoice] = useState<number | null>(null);
+  // Risposta appena inviata, mostrata subito mentre la scrittura viaggia verso il server.
+  const [pendingChoices, setPendingChoices] = useState<number[] | null>(null);
   const [sendError, setSendError] = useState<string | null>(null);
 
   if (myAnswer.status === 'loading') return <StatusMessage tone="loading" title="Un attimo…" />;
   const answer = myAnswer.status === 'ready' ? myAnswer.data : null;
-  const choice = answer?.choice ?? pendingChoice;
+  const choices = answer?.choices ?? pendingChoices;
   const timeIsUp = secondsLeft === 0;
-  const canAnswer = game.status === 'open' && choice === null && !timeIsUp;
+  const canAnswer = game.status === 'open' && !timeIsUp;
   const correct = game.status === 'revealed' ? game.revealed[question.id] : undefined;
 
-  function handleSelect(selected: number) {
-    setPendingChoice(selected);
+  function handleSubmit(selected: number[]) {
+    setPendingChoices(selected);
     setSendError(null);
     submitAnswer(gameId, question.id, uid, selected).catch((error: unknown) => {
-      setPendingChoice(null);
+      setPendingChoices(null);
       setSendError(`Risposta non inviata: ${describeError(error)}`);
     });
   }
@@ -177,17 +178,17 @@ function StudentQuestion({ uid, gameId, game, question }: StudentQuestionProps) 
       {secondsLeft !== null && game.currentTimeLimit !== null && (
         <Timer secondsLeft={secondsLeft} total={game.currentTimeLimit} />
       )}
-      <QuestionCard
+      <AnswerPicker
         question={question}
         index={game.currentIndex}
         total={game.questionCount}
-        onSelect={handleSelect}
-        disabled={!canAnswer}
-        selected={choice}
+        submitted={choices}
+        canAnswer={canAnswer}
         correct={correct}
+        onSubmit={handleSubmit}
       />
       {sendError !== null && <p className="form-error" role="alert">{sendError}</p>}
-      <Feedback game={game} question={question} choice={choice} answer={answer} timeIsUp={timeIsUp} uid={uid} />
+      <Feedback game={game} question={question} choices={choices} answer={answer} timeIsUp={timeIsUp} uid={uid} />
     </div>
   );
 }
@@ -195,43 +196,44 @@ function StudentQuestion({ uid, gameId, game, question }: StudentQuestionProps) 
 interface FeedbackProps {
   game: Game;
   question: PublicQuestion;
-  /** Scelta mostrata (anche se ancora in invio) e risposta confermata dal server. */
-  choice: number | null;
+  /** Opzioni inviate (anche se ancora in viaggio) e risposta confermata dal server. */
+  choices: readonly number[] | null;
   answer: Answer | null;
   timeIsUp: boolean;
   uid: string;
 }
 
 /** Messaggio sotto la domanda: conferma dell'invio, attesa, oppure esito dopo la rivelazione. */
-function Feedback({ game, question, choice, answer, timeIsUp, uid }: FeedbackProps) {
+function Feedback({ game, question, choices, answer, timeIsUp, uid }: FeedbackProps) {
   if (game.status === 'open') {
-    if (choice !== null) return <FeedbackBox tone="sent">✓ Risposta inviata! Attendi la soluzione.</FeedbackBox>;
+    if (choices !== null) return <FeedbackBox tone="sent">✓ Risposta inviata! Attendi la soluzione.</FeedbackBox>;
     if (timeIsUp) return <FeedbackBox tone="neutral">Tempo scaduto.</FeedbackBox>;
-    return <FeedbackBox tone="neutral">Tocca la risposta che ritieni corretta.</FeedbackBox>;
+    return <FeedbackBox tone="neutral">{answerInstructions(question)}</FeedbackBox>;
   }
 
   if (game.status === 'closed') {
     return (
       <FeedbackBox tone="neutral">
-        {choice === null ? 'Risposte chiuse: non hai risposto a questa domanda.' : 'Risposte chiuse. Attendi la soluzione…'}
+        {choices === null ? 'Risposte chiuse: non hai risposto a questa domanda.' : 'Risposte chiuse. Attendi la soluzione…'}
       </FeedbackBox>
     );
   }
 
   // Stato `revealed`.
   const correct = game.revealed[question.id] ?? [];
-  const correctLetters = correct.map(optionLetter).join(', ');
   const scoreLine = <MyScore game={game} uid={uid} />;
 
-  if (choice === null) {
+  if (choices === null) {
     return (
       <FeedbackBox tone="neutral">
-        <p>Non hai risposto. La risposta corretta era <strong>{correctLetters}</strong>.</p>
+        <p>
+          Non hai risposto. <CorrectAnswer correct={correct} />
+        </p>
         {scoreLine}
       </FeedbackBox>
     );
   }
-  if (isCorrect(choice, correct)) {
+  if (isCorrect(choices, correct)) {
     const points =
       answer === null ? null : pointsFor(answer, correct, game.openedAt[question.id]?.toMillis(), question.timeLimit);
     return (
@@ -242,7 +244,9 @@ function Feedback({ game, question, choice, answer, timeIsUp, uid }: FeedbackPro
   }
   return (
     <FeedbackBox tone="wrong" title="Sbagliato">
-      <p>La risposta corretta era <strong>{correctLetters}</strong>.</p>
+      <p>
+        <CorrectAnswer correct={correct} />
+      </p>
       {scoreLine}
     </FeedbackBox>
   );

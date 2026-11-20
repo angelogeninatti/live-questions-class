@@ -47,10 +47,19 @@ interface GameSnapshot {
   currentQuestionId: string;
   currentOptionCount: number;
   currentTimeLimit: number | null;
+  currentMultipleAnswers: boolean;
 }
 
 const randomBetween = (min: number, max: number) => min + Math.random() * (max - min);
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+/** Un'opzione a caso; se le risposte corrette sono più d'una, un gruppo a caso di 1-N opzioni. */
+function randomChoices(optionCount: number, multipleAnswers: boolean): number[] {
+  const indexes = Array.from({ length: optionCount }, (_, index) => index);
+  if (!multipleAnswers) return [indexes[Math.floor(Math.random() * optionCount)] ?? 0];
+  const picked = indexes.filter(() => Math.random() < 0.5);
+  return picked.length > 0 ? picked : [0];
+}
 
 /** Un singolo studente simulato, con la sua app Firebase (quindi la sua connessione e il suo account). */
 async function runStudent(index: number, config: FirebaseOptions): Promise<void> {
@@ -90,10 +99,10 @@ async function runStudent(index: number, config: FirebaseOptions): Promise<void>
       answered.add(questionId);
       // Risponde entro l'80% del tempo disponibile (o entro 8 secondi se non c'è limite).
       const maxDelay = (game.currentTimeLimit ?? 10) * 800;
-      const choice = Math.floor(Math.random() * game.currentOptionCount);
+      const choices = randomChoices(game.currentOptionCount, game.currentMultipleAnswers);
       setTimeout(() => {
         setDoc(doc(db, 'games', gameId, 'questions', questionId, 'answers', user.uid), {
-          choice,
+          choices,
           answeredAt: serverTimestamp(),
         }).catch(() => console.warn(`${nickname}: risposta a ${questionId} rifiutata (domanda già chiusa?)`));
       }, randomBetween(500, maxDelay));

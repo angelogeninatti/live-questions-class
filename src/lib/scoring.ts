@@ -10,8 +10,13 @@ export const MAX_SPEED_BONUS = 500;
 /** Per le domande senza limite di tempo il bonus si esaurisce dopo questi secondi. */
 const BONUS_WINDOW_WITHOUT_LIMIT = 30;
 
-export function isCorrect(choice: number, correct: readonly number[] | undefined): boolean {
-  return correct?.includes(choice) ?? false;
+/**
+ * Una risposta è corretta se le opzioni scelte sono esattamente quelle corrette:
+ * con più risposte corrette bisogna selezionarle tutte, e nessuna sbagliata.
+ */
+export function isCorrect(choices: readonly number[], correct: readonly number[] | undefined): boolean {
+  if (correct === undefined || choices.length !== correct.length) return false;
+  return correct.every((index) => choices.includes(index));
 }
 
 /** Punti di una singola risposta: 0 se sbagliata, da 500 a 1000 se corretta. */
@@ -21,7 +26,7 @@ export function pointsFor(
   openedAtMillis: number | undefined,
   timeLimit: number | null,
 ): number {
-  if (!isCorrect(answer.choice, correct)) return 0;
+  if (!isCorrect(answer.choices, correct)) return 0;
   if (openedAtMillis === undefined) return BASE_POINTS;
   const windowSeconds = timeLimit ?? BONUS_WINDOW_WITHOUT_LIMIT;
   const elapsedSeconds = (answer.answeredAt.toMillis() - openedAtMillis) / 1000;

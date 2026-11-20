@@ -23,7 +23,7 @@
       "options": ["Il gatto quadrato", "Il pesce volante a vapore", "Il cane", "La lumaca supersonica"],
       "correct": [0, 3],
       "timeLimit": 30,
-      "explanation": "Esempio di domanda con più risposte corrette: vale una qualsiasi delle due."
+      "explanation": "Esempio di domanda con più risposte corrette: bisogna selezionarle entrambe, e nessun'altra."
     },
     {
       "id": "q4",

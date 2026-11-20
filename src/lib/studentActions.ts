@@ -37,9 +37,10 @@ export async function joinGame(gameId: string, uid: string, nickname: string): P
 }
 
 /**
- * Invia la risposta alla domanda corrente. Il documento ha come id l'uid dello studente:
+ * Invia la risposta alla domanda corrente: l'opzione scelta, o tutte quelle selezionate
+ * se la domanda ha più risposte corrette. Il documento ha come id l'uid dello studente:
  * le regole permettono di crearlo una sola volta e mai di modificarlo.
  */
-export async function submitAnswer(gameId: string, questionId: string, uid: string, choice: number): Promise<void> {
-  await setDoc(answerRef(gameId, questionId, uid), { choice, answeredAt: serverTimestamp() });
+export async function submitAnswer(gameId: string, questionId: string, uid: string, choices: readonly number[]): Promise<void> {
+  await setDoc(answerRef(gameId, questionId, uid), { choices: [...choices], answeredAt: serverTimestamp() });
 }

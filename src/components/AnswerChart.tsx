@@ -9,9 +9,12 @@ interface AnswerChartProps {
   correct?: readonly number[];
 }
 
-/** Grafico a barre orizzontali: quante risposte ha ricevuto ogni opzione. */
+/**
+ * Grafico a barre orizzontali: quanti studenti hanno scelto ogni opzione.
+ * Nelle domande con più risposte corrette uno studente conta su più barre.
+ */
 export function AnswerChart({ options, answers, correct }: AnswerChartProps) {
-  const counts = options.map((_, index) => answers.filter((answer) => answer.choice === index).length);
+  const counts = options.map((_, index) => answers.filter((answer) => answer.choices.includes(index)).length);
   const max = Math.max(1, ...counts);
 
   return (

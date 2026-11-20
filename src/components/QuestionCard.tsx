@@ -10,24 +10,26 @@ interface QuestionCardProps {
   /** Se presente, le opzioni sono pulsanti cliccabili (vista studente). */
   onSelect?: (choice: number) => void;
   disabled?: boolean;
-  /** Opzione scelta dallo studente. */
-  selected?: number | null;
+  /** Opzioni selezionate dallo studente. */
+  selected?: readonly number[];
   /** Opzioni corrette, da evidenziare dopo la rivelazione. */
   correct?: readonly number[];
 }
 
 /** Testo della domanda e opzioni colorate, usato sia dagli studenti sia sul proiettore. */
-export function QuestionCard({ question, index, total, onSelect, disabled = false, selected = null, correct }: QuestionCardProps) {
+export function QuestionCard({ question, index, total, onSelect, disabled = false, selected = [], correct }: QuestionCardProps) {
   return (
     <section className="question-card">
       <p className="question-counter">
         Domanda {index + 1} di {total}
       </p>
       <h2 className="question-text">{question.text}</h2>
+      {question.multipleAnswers && <p className="question-hint">Più risposte corrette: selezionale tutte.</p>}
       <ol className="option-grid">
         {question.options.map((option, optionIndex) => {
+          const isSelected = selected.includes(optionIndex);
           const classes = ['option', optionColorClass(optionIndex)];
-          if (selected === optionIndex) classes.push('option-selected');
+          if (isSelected) classes.push('option-selected');
           if (correct !== undefined) classes.push(correct.includes(optionIndex) ? 'option-correct' : 'option-wrong');
 
           const content = (
@@ -49,7 +51,7 @@ export function QuestionCard({ question, index, total, onSelect, disabled = fals
                   type="button"
                   className={classes.join(' ')}
                   disabled={disabled}
-                  aria-pressed={selected === optionIndex}
+                  aria-pressed={isSelected}
                   onClick={() => onSelect(optionIndex)}
                 >
                   {content}
