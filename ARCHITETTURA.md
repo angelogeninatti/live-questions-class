@@ -1,6 +1,6 @@
 # Architettura
 
-Web app per quiz in aula, in stile Kahoot. Il docente proietta le domande, gli studenti rispondono dal telefono e la soluzione viene rivelata in diretta. Ogni quiz ha poi una pagina di ripasso permanente. Il sito è statico (React + TypeScript su GitHub Pages) e tutti i dati stanno su **Cloud Firestore**. Non c'è un server scritto da noi: le **regole di sicurezza** di Firestore decidono chi può leggere e scrivere cosa.
+Web app per quiz in aula, in stile Kahoot. Il docente proietta le domande, gli studenti rispondono dal telefono e la soluzione viene rivelata in diretta. Ogni quiz ha poi una pagina di ripasso permanente: lo studente rifà il quiz da solo, vede subito la soluzione di ogni domanda e alla fine trova l'elenco completo delle soluzioni. Il sito è statico (React + TypeScript su GitHub Pages) e tutti i dati stanno su **Cloud Firestore**. Non c'è un server scritto da noi: le **regole di sicurezza** di Firestore decidono chi può leggere e scrivere cosa.
 
 ## Struttura del codice
 

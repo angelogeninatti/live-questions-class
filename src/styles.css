@@ -920,6 +920,19 @@ button.option:disabled:not(.option-selected) {
   margin: 0;
 }
 
+.review-header .button-row {
+  justify-content: flex-start;
+}
+
+.review-header .my-score {
+  margin-top: 0.75rem;
+}
+
+/* Pulsante "Prossima domanda": a tutta larghezza, comodo da toccare sul telefono */
+.review-next .button {
+  width: 100%;
+}
+
 .review-list {
   list-style: none;
   padding: 0;
