@@ -110,6 +110,11 @@
   gap: 0.75rem;
 }
 
+/* Sul proiettore tutte le opzioni hanno la stessa altezza, anche con testi di lunghezza diversa */
+.game-stage .option-grid {
+  grid-auto-rows: 1fr;
+}
+
 /* Schermi larghi (PC collegato al proiettore): area principale + barra laterale */
 @media (min-width: 1000px) {
   .game-layout {
