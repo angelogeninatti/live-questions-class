@@ -25,7 +25,7 @@ import { useMyPlayer } from '../hooks/usePlayers';
 import { useQuiz } from '../hooks/useQuiz';
 import { describeError } from '../lib/errors';
 import { answerInstructions } from '../lib/options';
-import { isCorrect, pointsFor, rankOf } from '../lib/scoring';
+import { isCorrect, isPartiallyCorrect, partialText, pointsFor, rankOf } from '../lib/scoring';
 import { submitAnswer } from '../lib/studentActions';
 import type { Answer, Game, PublicQuestion } from '../types';
 import './StudentView.css';
@@ -233,11 +233,22 @@ function Feedback({ game, question, choices, answer, timeIsUp, uid }: FeedbackPr
       </FeedbackBox>
     );
   }
+  const points =
+    answer === null ? null : pointsFor(answer, correct, game.openedAt[question.id]?.toMillis(), question.timeLimit);
+  const pointsText = points === null ? '' : ` +${points} punti`;
   if (isCorrect(choices, correct)) {
-    const points =
-      answer === null ? null : pointsFor(answer, correct, game.openedAt[question.id]?.toMillis(), question.timeLimit);
     return (
-      <FeedbackBox tone="correct" title={points === null ? 'Corretto! 🎉' : `Corretto! 🎉 +${points} punti`}>
+      <FeedbackBox tone="correct" title={`Corretto! 🎉${pointsText}`}>
+        {scoreLine}
+      </FeedbackBox>
+    );
+  }
+  if (isPartiallyCorrect(choices, correct)) {
+    return (
+      <FeedbackBox tone="partial" title={`Quasi! ${partialText(choices, correct)}.${pointsText}`}>
+        <p>
+          <CorrectAnswer correct={correct} />
+        </p>
         {scoreLine}
       </FeedbackBox>
     );

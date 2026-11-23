@@ -6,7 +6,7 @@
  */
 import type { AnswerWithUid, Game, LeaderboardEntry, PublicQuestion } from '../types';
 import { optionLetter } from './options';
-import { isCorrect } from './scoring';
+import { creditFor } from './scoring';
 
 const SEPARATOR = ';';
 
@@ -15,6 +15,14 @@ function csvCell(value: string | number): string {
   // Racchiudiamo tra virgolette (raddoppiando quelle interne) se il testo
   // contiene caratteri speciali per il formato CSV.
   return /[";\n\r]/.test(text) ? `"${text.replaceAll('"', '""')}"` : text;
+}
+
+/** Esito di una risposta: "corretta", "sbagliata" oppure "parziale 2/3" (opzioni corrette scelte / totali). */
+function outcomeLabel(choices: readonly number[], correct: readonly number[]): string {
+  const credit = creditFor(choices, correct);
+  if (credit === 1) return 'corretta';
+  if (credit === 0) return 'sbagliata';
+  return `parziale ${new Set(choices).size}/${correct.length}`;
 }
 
 /** Una riga per studente: punteggio totale e, per ogni domanda, risposta data ed esito. */
@@ -39,7 +47,7 @@ export function buildResultsCsv(
         continue;
       }
       const correct = game.revealed[question.id];
-      const outcome = correct === undefined ? 'non rivelata' : isCorrect(answer.choices, correct) ? 'corretta' : 'sbagliata';
+      const outcome = correct === undefined ? 'non rivelata' : outcomeLabel(answer.choices, correct);
       const seconds =
         openedAt === undefined ? '' : ((answer.answeredAt.toMillis() - openedAt.toMillis()) / 1000).toFixed(1).replace('.', ',');
       row.push(answer.choices.map(optionLetter).join(', '), outcome, seconds);

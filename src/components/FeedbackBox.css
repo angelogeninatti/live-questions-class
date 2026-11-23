@@ -29,6 +29,11 @@
   color: #14532d;
 }
 
+.feedback-partial {
+  background: #fef3c7;
+  color: #78350f;
+}
+
 .feedback-wrong {
   background: var(--color-error-bg);
   color: #7f1d1d;

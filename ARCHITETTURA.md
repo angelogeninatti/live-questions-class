@@ -48,7 +48,7 @@ docente: "Avvia domanda"   → games/{id}.status = "open", openedAt[q] = ora del
 studenti: vedono la domanda → creano answers/{uid} (le regole controllano fase, tempo, opzione)
 docente: vede il grafico crescere (onSnapshot sulle risposte); a tempo scaduto chiude da solo
 docente: "Rivela soluzione" → copia la soluzione in games/{id}.revealed[q] e aggiorna la classifica
-studenti: confrontano la propria risposta con revealed[q] → "Corretto!" / "Sbagliato"
+studenti: confrontano la propria risposta con revealed[q] → "Corretto!" / "Quasi!" / "Sbagliato"
 ```
 
 ## Scelte principali
@@ -60,7 +60,7 @@ studenti: confrontano la propria risposta con revealed[q] → "Corretto!" / "Sba
 - **Identità degli studenti.** Ogni studente entra con un account anonimo di Firebase, che il browser ricorda. Se ricarica la pagina ritrova lo stesso uid, quindi la sua partita e le risposte già date.
 - **Integrità del punteggio.** L'ora di ogni risposta è quella del server: le regole impongono `answeredAt == request.time`. Il docente calcola la classifica da zero a ogni rivelazione, con una funzione pura (`computeLeaderboard`), poi la copia nel documento della partita. Così il risultato resta coerente anche quando si torna indietro di una domanda.
 - **Nickname.** Un nickname è unico se il documento `nicknames/{nome}` si riesce a creare: due studenti non possono crearlo entrambi. Le parole vietate non stanno nel repository, che è pubblico, ma su Firestore. L'app le confronta in modo tollerante (accenti, cifre al posto di lettere, lettere ripetute). Le regole ripetono il controllo parola per parola, nel caso qualcuno scriva nel database senza passare dall'app. Resta comunque la possibilità di espellere un partecipante.
-- **Domande con più risposte corrette.** Lo studente seleziona le opzioni e poi preme "Invia risposta"; la risposta è corretta solo se coincide esattamente con le opzioni corrette. Per mostrare questa modalità, la parte pubblica della domanda dice soltanto *che* le corrette sono più d'una (`multipleAnswers`), non quali. Le regole accettano più opzioni solo per queste domande.
+- **Domande con più risposte corrette.** Lo studente seleziona le opzioni e poi preme "Invia risposta"; il punteggio è proporzionale alle opzioni corrette selezionate (2 su 3 → 2/3 dei punti), ma basta un'opzione sbagliata per ottenere 0. La colonna "Corrette" della classifica conta solo le risposte del tutto corrette. Per mostrare questa modalità, la parte pubblica della domanda dice soltanto *che* le corrette sono più d'una (`multipleAnswers`), non quali. Le regole accettano più opzioni solo per queste domande.
 - **Routing a hash** (`#/...`). GitHub Pages serve solo file statici. Con l'hash il server riceve sempre `index.html`, quindi ricaricare una pagina non dà mai 404.
 - **Validazione dell'upload con zod.** Lo schema è annotato con i tipi di `types.ts`: se tipi e schema divergono, il compilatore segnala l'errore. Il file viene validato per intero prima di qualsiasi scrittura su Firestore.
 

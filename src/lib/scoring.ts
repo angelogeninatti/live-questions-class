@@ -11,28 +11,51 @@ export const MAX_SPEED_BONUS = 500;
 const BONUS_WINDOW_WITHOUT_LIMIT = 30;
 
 /**
- * Una risposta è corretta se le opzioni scelte sono esattamente quelle corrette:
- * con più risposte corrette bisogna selezionarle tutte, e nessuna sbagliata.
+ * Quota di punti meritata da una risposta, tra 0 e 1.
+ * - Una sola opzione sbagliata (o nessuna opzione) vale 0.
+ * - Altrimenti vale la frazione di opzioni corrette selezionate: con 3 corrette,
+ *   selezionarne 2 vale 2/3. Con una sola corretta è quindi 0 oppure 1.
  */
-export function isCorrect(choices: readonly number[], correct: readonly number[] | undefined): boolean {
-  if (correct === undefined || choices.length !== correct.length) return false;
-  return correct.every((index) => choices.includes(index));
+export function creditFor(choices: readonly number[], correct: readonly number[] | undefined): number {
+  if (correct === undefined || correct.length === 0 || choices.length === 0) return 0;
+  if (choices.some((index) => !correct.includes(index))) return 0;
+  return new Set(choices).size / correct.length;
 }
 
-/** Punti di una singola risposta: 0 se sbagliata, da 500 a 1000 se corretta. */
+/** Una risposta è corretta (del tutto) se seleziona tutte le opzioni corrette e nessuna sbagliata. */
+export function isCorrect(choices: readonly number[], correct: readonly number[] | undefined): boolean {
+  return creditFor(choices, correct) === 1;
+}
+
+/** Una risposta è parzialmente corretta se seleziona solo alcune delle opzioni corrette, e nessuna sbagliata. */
+export function isPartiallyCorrect(choices: readonly number[], correct: readonly number[] | undefined): boolean {
+  const credit = creditFor(choices, correct);
+  return credit > 0 && credit < 1;
+}
+
+/** Messaggio per una risposta parzialmente corretta, es. "Hai trovato 2 risposte corrette su 3". */
+export function partialText(choices: readonly number[], correct: readonly number[]): string {
+  return `Hai trovato ${new Set(choices).size} risposte corrette su ${correct.length}`;
+}
+
+/**
+ * Punti di una singola risposta: da 500 a 1000 se corretta (più è veloce, più punti),
+ * moltiplicati per la quota meritata se è solo parzialmente corretta; 0 se sbagliata.
+ */
 export function pointsFor(
   answer: Answer,
   correct: readonly number[] | undefined,
   openedAtMillis: number | undefined,
   timeLimit: number | null,
 ): number {
-  if (!isCorrect(answer.choices, correct)) return 0;
-  if (openedAtMillis === undefined) return BASE_POINTS;
+  const credit = creditFor(answer.choices, correct);
+  if (credit === 0) return 0;
+  if (openedAtMillis === undefined) return Math.round(BASE_POINTS * credit);
   const windowSeconds = timeLimit ?? BONUS_WINDOW_WITHOUT_LIMIT;
   const elapsedSeconds = (answer.answeredAt.toMillis() - openedAtMillis) / 1000;
   // Frazione di tempo rimasto, limitata tra 0 e 1.
   const remaining = Math.min(1, Math.max(0, 1 - elapsedSeconds / windowSeconds));
-  return BASE_POINTS + Math.round(MAX_SPEED_BONUS * remaining);
+  return Math.round((BASE_POINTS + MAX_SPEED_BONUS * remaining) * credit);
 }
 
 /**
@@ -60,9 +83,9 @@ export function computeLeaderboard(
     for (const answer of answersByQuestion[question.id] ?? []) {
       const entry = entries.get(answer.uid);
       if (entry === undefined) continue; // studente espulso o non più in partita
-      const points = pointsFor(answer, correct, openedAt, question.timeLimit);
-      entry.score += points;
-      if (points > 0) entry.correctCount += 1;
+      entry.score += pointsFor(answer, correct, openedAt, question.timeLimit);
+      // `correctCount` conta solo le risposte del tutto corrette, non quelle parziali.
+      if (isCorrect(answer.choices, correct)) entry.correctCount += 1;
     }
   }
 

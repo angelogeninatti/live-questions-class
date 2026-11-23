@@ -17,7 +17,7 @@ import { QuizReviewList } from '../components/QuizReviewList';
 import { StatusMessage } from '../components/StatusMessage';
 import { useReview } from '../hooks/useReview';
 import { answerInstructions } from '../lib/options';
-import { isCorrect } from '../lib/scoring';
+import { isCorrect, isPartiallyCorrect, partialText } from '../lib/scoring';
 import type { PublicQuestion, QuizDoc, Solution, SolutionsDoc } from '../types';
 import './ReviewView.css';
 
@@ -123,6 +123,12 @@ function PracticeQuestion({ question, index, total, solution, submitted, onSubmi
         <>
           {isCorrect(submitted, correct) ? (
             <FeedbackBox tone="correct" title="Corretto! 🎉" />
+          ) : isPartiallyCorrect(submitted, correct) ? (
+            <FeedbackBox tone="partial" title={`Quasi! ${partialText(submitted, correct)}.`}>
+              <p>
+                <CorrectAnswer correct={correct} />
+              </p>
+            </FeedbackBox>
           ) : (
             <FeedbackBox tone="wrong" title="Sbagliato">
               <p>
@@ -151,10 +157,13 @@ interface SummaryProps {
 
 /** Fine del ripasso: quante risposte corrette, poi tutte le domande con le soluzioni. */
 function Summary({ quiz, solutions, choices, onRestart }: SummaryProps) {
-  const correctCount = quiz.questions.filter((question, index) => {
-    const selected = choices[index];
-    return selected !== undefined && isCorrect(selected, solutions.byQuestion[question.id]?.correct);
-  }).length;
+  const countWhere = (test: typeof isCorrect) =>
+    quiz.questions.filter((question, index) => {
+      const selected = choices[index];
+      return selected !== undefined && test(selected, solutions.byQuestion[question.id]?.correct);
+    }).length;
+  const correctCount = countWhere(isCorrect);
+  const partialCount = countWhere(isPartiallyCorrect);
 
   return (
     <article>
@@ -162,7 +171,8 @@ function Summary({ quiz, solutions, choices, onRestart }: SummaryProps) {
         <p className="muted">Ripasso</p>
         <h1>{quiz.title}</h1>
         <p className="review-score no-print">
-          Hai risposto correttamente a {correctCount} domande su {quiz.questions.length}.
+          Hai risposto correttamente a {correctCount} domande su {quiz.questions.length}
+          {partialCount > 0 && `, e in parte ad altre ${partialCount}`}.
         </p>
         <div className="button-row no-print">
           <button type="button" className="button secondary" onClick={onRestart}>

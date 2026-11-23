@@ -2,8 +2,8 @@ import type { ReactNode } from 'react';
 import './FeedbackBox.css';
 
 interface FeedbackBoxProps {
-  /** `neutral` istruzioni e attese, `sent` risposta inviata, `correct` e `wrong` esito della risposta. */
-  tone: 'neutral' | 'sent' | 'correct' | 'wrong';
+  /** `neutral` istruzioni e attese, `sent` risposta inviata, `correct`, `partial` e `wrong` esito della risposta. */
+  tone: 'neutral' | 'sent' | 'correct' | 'partial' | 'wrong';
   /** Riga in grande in cima al riquadro (es. "Corretto!"). */
   title?: string;
   children?: ReactNode;

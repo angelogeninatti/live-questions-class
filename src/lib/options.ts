@@ -18,6 +18,6 @@ export function optionColorClass(index: number): string {
 /** Cosa deve fare lo studente per rispondere: cambia se le risposte corrette sono più d'una. */
 export function answerInstructions(question: PublicQuestion): string {
   return question.multipleAnswers
-    ? 'Seleziona tutte le risposte corrette, poi premi "Invia risposta".'
+    ? 'Seleziona tutte le risposte corrette, poi premi "Invia risposta". Ogni opzione corretta vale una parte dei punti, ma basta una sbagliata per perderli tutti.'
     : 'Tocca la risposta che ritieni corretta.';
 }
